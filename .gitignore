@@ -96,3 +96,7 @@ keystore.properties
 signing/
 keystore/
 
+
+# Settings of test devices (virtual)
+.idea/deviceManager.xml
+.idea/caches/deviceStreaming.xml

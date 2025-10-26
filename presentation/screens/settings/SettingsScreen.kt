@@ -9,7 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-// Композ экрана настроект
+// Композ экрана настроек
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(onBack: () -> Unit) {
@@ -43,7 +43,7 @@ fun SettingsScreen(onBack: () -> Unit) {
                 singleLine = true
             )
 
-            Divider()
+            HorizontalDivider()
 
             // Настройки сетки
             Text(
@@ -64,7 +64,7 @@ fun SettingsScreen(onBack: () -> Unit) {
                 )
             }
 
-            Divider()
+            HorizontalDivider()
 
             // Звук и анимации
             Text(

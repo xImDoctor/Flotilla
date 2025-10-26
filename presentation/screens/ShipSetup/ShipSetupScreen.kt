@@ -1,4 +1,4 @@
-package com.yourname.flotilla.presentation.screens.ShipSetup
+package com.imdoctor.flotilla.presentation.screens.setup
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons

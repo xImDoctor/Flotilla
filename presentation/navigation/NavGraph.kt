@@ -55,7 +55,7 @@ fun FlotillaNavGraph(navController: NavHostController, startDestination: String 
             )
         }
 
-        // постановка короблей
+        // постановка кораблей
         composable(
             route = "${Screen.ShipSetup.route}/{${Screen.ShipSetup.ARG_GAME_MODE}}",
             arguments = listOf(

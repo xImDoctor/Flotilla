@@ -13,7 +13,7 @@ sealed class Screen(val route: String) {
     data object Settings : Screen("settings")
 
 
-    // постановка короблей
+    // постановка кораблей
     data object ShipSetup : Screen("ship_setup") {
 
         // Параметр: режим игры (vs_ai, vs_player, local)
@@ -42,9 +42,9 @@ object NavigationValidator {
     private val GAME_MODE_REGEX = Regex("^(vs_ai|vs_player|local)$")
     private val GAME_ID_REGEX = Regex("^[a-zA-Z0-9_-]{8,32}$")
 
-    fun isValidGameMode(mode: String?): Boolean -> return mode?.matches(GAME_MODE_REGEX) == true
+    fun isValidGameMode(mode: String?): Boolean = mode?.matches(GAME_MODE_REGEX) == true
 
-    fun isValidGameId(id: String?): Boolean -> return id?.matches(GAME_ID_REGEX) == true
+    fun isValidGameId(id: String?): Boolean = id?.matches(GAME_ID_REGEX) == true
 
     /**
      * Санитизация строки для предотвращения инъекций

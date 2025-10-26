@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+
+    <!-- Базовая конфигурация для всех соединений -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+
+    <!-- Включение localhost для локального теста -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="user" />
+        </trust-anchors>
+    </debug-overrides>
+
+
+    <!-- TODO: добавить конфигурацию для продакшена -->
+    <!-- <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">api.flotilla-game.com</domain>
+        <pin-set expiration="2026-01-01">
+            <pin digest="SHA-256">base64==</pin>
+            <pin digest="SHA-256">backup-base64==</pin>
+        </pin-set>
+    </domain-config> -->
+
+</network-security-config>

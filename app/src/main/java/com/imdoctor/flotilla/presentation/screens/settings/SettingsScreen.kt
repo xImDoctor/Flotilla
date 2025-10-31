@@ -37,7 +37,8 @@ fun SettingsScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Никнейм
-            var nickname by remember { mutableStateOf(stringResource(R.string.settings_nickname_default)) }
+            val defaultNickname = stringResource(R.string.settings_nickname_default)
+            var nickname by remember { mutableStateOf(defaultNickname) }
             OutlinedTextField(
                 value = nickname,
                 onValueChange = { nickname = it },

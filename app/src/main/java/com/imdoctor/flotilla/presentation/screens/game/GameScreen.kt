@@ -5,7 +5,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.imdoctor.flotilla.R
 
 // Защита от скриншотов (для пвп режима)
 import com.imdoctor.flotilla.utils.security.SecureScreen
@@ -22,10 +24,10 @@ fun GameScreen(gameId: String, onGameEnd: () -> Unit, onExitGame: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Происходит бой") },
+                title = { Text(stringResource(R.string.game_title)) },
                 actions = {
                     TextButton(onClick = onExitGame) {
-                        Text("Выйти")
+                        Text(stringResource(R.string.common_exit))
                     }
                 }
             )
@@ -40,14 +42,14 @@ fun GameScreen(gameId: String, onGameEnd: () -> Unit, onExitGame: () -> Unit) {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Игровой экран",
+                text = stringResource(R.string.game_screen_heading),
                 style = MaterialTheme.typography.headlineMedium
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Game ID: $gameId",
+                text = stringResource(R.string.game_id_label, gameId),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
             )
@@ -66,7 +68,7 @@ fun GameScreen(gameId: String, onGameEnd: () -> Unit, onExitGame: () -> Unit) {
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("Вражеская сетка\n(В будущих обновлениях...)")
+                        Text(stringResource(R.string.game_enemy_grid_placeholder))
                     }
                 }
 
@@ -77,7 +79,7 @@ fun GameScreen(gameId: String, onGameEnd: () -> Unit, onExitGame: () -> Unit) {
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("Ваша сетка\n(В будущих обновлениях...)")
+                        Text(stringResource(R.string.game_player_grid_placeholder))
                     }
                 }
             }
@@ -91,7 +93,7 @@ fun GameScreen(gameId: String, onGameEnd: () -> Unit, onExitGame: () -> Unit) {
                     containerColor = MaterialTheme.colorScheme.error
                 )
             ) {
-                Text("Завершить игру (Debug)")
+                Text(stringResource(R.string.game_end_debug_button))
             }
 
         }

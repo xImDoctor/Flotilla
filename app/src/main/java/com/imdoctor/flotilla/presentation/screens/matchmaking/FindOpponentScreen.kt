@@ -7,7 +7,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.imdoctor.flotilla.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -17,10 +19,10 @@ fun FindOpponentScreen(onOpponentFound: (String) -> Unit, onCancel: () -> Unit) 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Найти соперника") },
+                title = { Text(stringResource(R.string.find_opponent_title)) },
                 navigationIcon = {
                     IconButton(onClick = onCancel) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.common_back))
                     }
                 }
             )
@@ -43,7 +45,7 @@ fun FindOpponentScreen(onOpponentFound: (String) -> Unit, onCancel: () -> Unit) 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                    text = "Ищем соперника...",
+                    text = stringResource(R.string.find_opponent_searching),
                     style = MaterialTheme.typography.titleMedium
                 )
 
@@ -52,12 +54,12 @@ fun FindOpponentScreen(onOpponentFound: (String) -> Unit, onCancel: () -> Unit) 
                 Button(
                     onClick = { isSearching = false }
                 ) {
-                    Text("Отменить поиск")
+                    Text(stringResource(R.string.find_opponent_cancel_search))
                 }
 
             } else {
                 Text(
-                    text = "Готовы найти соперника?",
+                    text = stringResource(R.string.find_opponent_ready_prompt),
                     style = MaterialTheme.typography.titleLarge
                 )
 
@@ -67,7 +69,7 @@ fun FindOpponentScreen(onOpponentFound: (String) -> Unit, onCancel: () -> Unit) 
                     onClick = { isSearching = true },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Начать поиск матча")
+                    Text(stringResource(R.string.find_opponent_start_search))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -76,14 +78,14 @@ fun FindOpponentScreen(onOpponentFound: (String) -> Unit, onCancel: () -> Unit) 
                     onClick = onCancel,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Назад в меню")
+                    Text(stringResource(R.string.find_opponent_back_to_menu))
                 }
             }
 
 
             Spacer(modifier = Modifier.height(32.dp))
             Text(
-                text = "Для работы матчмэйкинга требуется интернет соединение",
+                text = stringResource(R.string.find_opponent_internet_required),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
             )

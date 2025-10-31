@@ -1,3 +1,58 @@
 <resources>
     <string name="app_name">Flotilla</string>
+
+    <!-- Общие строки -->
+    <string name="common_back">Назад</string>
+    <string name="common_exit">Выйти</string>
+
+    <!-- Main Menu Screen -->
+    <string name="main_menu_title">FLOTILLA</string>
+    <string name="main_menu_subtitle">Морской бой</string>
+    <string name="main_menu_play_vs_ai">Игра против ИИ</string>
+    <string name="main_menu_find_opponent">Найти соперника</string>
+    <string name="main_menu_statistics">Статистика</string>
+    <string name="main_menu_settings">Настройки</string>
+
+    <!-- Ship Setup Screen -->
+    <string name="ship_setup_title">Разместите корабли</string>
+    <string name="ship_setup_heading">Расстановка кораблей</string>
+    <string name="ship_setup_game_mode">Режим игры: %1$s</string>
+    <string name="ship_setup_grid_placeholder">Сетка 10x10\n(В будущих обновлениях…)</string>
+    <string name="ship_setup_ready_button">К бою готов!</string>
+
+    <!-- Statistics Screen -->
+    <string name="statistics_title">Статистика</string>
+    <string name="statistics_total_games">Всего игр</string>
+    <string name="statistics_wins">Побед</string>
+    <string name="statistics_losses">Поражений</string>
+    <string name="statistics_win_rate">Процент побед</string>
+    <string name="statistics_accuracy">Точность попаданий</string>
+    <string name="statistics_empty_message">Сыграйте матч, чтобы обновить статистику</string>
+
+    <!-- Game Screen -->
+    <string name="game_title">Происходит бой</string>
+    <string name="game_screen_heading">Игровой экран</string>
+    <string name="game_id_label">Game ID: %1$s</string>
+    <string name="game_enemy_grid_placeholder">Вражеская сетка\n(В будущих обновлениях…)</string>
+    <string name="game_player_grid_placeholder">Ваша сетка\n(В будущих обновлениях…)</string>
+    <string name="game_end_debug_button">Завершить игру (Debug)</string>
+
+    <!-- Find Opponent Screen -->
+    <string name="find_opponent_title">Найти соперника</string>
+    <string name="find_opponent_searching">Ищем соперника…</string>
+    <string name="find_opponent_cancel_search">Отменить поиск</string>
+    <string name="find_opponent_ready_prompt">Готовы найти соперника?</string>
+    <string name="find_opponent_start_search">Начать поиск матча</string>
+    <string name="find_opponent_back_to_menu">Назад в меню</string>
+    <string name="find_opponent_internet_required">Для работы матчмэйкинга требуется интернет соединение</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Настройки</string>
+    <string name="settings_nickname_default">Player</string>
+    <string name="settings_nickname_label">Никнейм</string>
+    <string name="settings_grid_title">Настройки сетки</string>
+    <string name="settings_show_coordinates">Показывать координаты</string>
+    <string name="settings_audio_effects_title">Аудио и эффекты</string>
+    <string name="settings_sound_effects">Звуковые эффекты</string>
+    <string name="settings_animations">Анимация</string>
 </resources>

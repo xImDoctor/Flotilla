@@ -7,7 +7,9 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.imdoctor.flotilla.R
 
 
 // Композ для предварительного размещения кораблей (экран расстановки)
@@ -18,10 +20,10 @@ fun ShipSetupScreen(gameMode: String, onSetupComplete: (String) -> Unit, onBack:
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Разместите корабли") },
+                title = { Text(stringResource(R.string.ship_setup_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.common_back))
                     }
                 }
             )
@@ -36,14 +38,14 @@ fun ShipSetupScreen(gameMode: String, onSetupComplete: (String) -> Unit, onBack:
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Расстановка кораблей",
+                text = stringResource(R.string.ship_setup_heading),
                 style = MaterialTheme.typography.headlineMedium
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Режим игры: $gameMode",
+                text = stringResource(R.string.ship_setup_game_mode, gameMode),
                 style = MaterialTheme.typography.bodyLarge
             )
 
@@ -58,7 +60,7 @@ fun ShipSetupScreen(gameMode: String, onSetupComplete: (String) -> Unit, onBack:
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("Сетка 10x10\n(В будущих обновлениях...)")
+                    Text(stringResource(R.string.ship_setup_grid_placeholder))
                 }
             }
 
@@ -72,7 +74,7 @@ fun ShipSetupScreen(gameMode: String, onSetupComplete: (String) -> Unit, onBack:
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("К бою готов!")
+                Text(stringResource(R.string.ship_setup_ready_button))
             }
 
         }

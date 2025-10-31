@@ -5,8 +5,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.imdoctor.flotilla.R
 
 
 // Композ для главного меню: заголовок + подзаголовок, текст для кнопок + кнопки
@@ -22,7 +24,7 @@ fun MainMenuScreen(onNewGame: (String) -> Unit, onFindOpponent: () -> Unit, onSt
     ) {
         // Заголовок
         Text(
-            text = "FLOTILLA",
+            text = stringResource(R.string.main_menu_title),
             style = MaterialTheme.typography.displayLarge,
             fontWeight = FontWeight.Bold
         )
@@ -30,7 +32,7 @@ fun MainMenuScreen(onNewGame: (String) -> Unit, onFindOpponent: () -> Unit, onSt
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "Морской бой",
+            text = stringResource(R.string.main_menu_subtitle),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
         )
@@ -39,21 +41,21 @@ fun MainMenuScreen(onNewGame: (String) -> Unit, onFindOpponent: () -> Unit, onSt
 
         // Кнопки меню
         MenuButton(
-            text = "Игра против ИИ",
+            text = stringResource(R.string.main_menu_play_vs_ai),
             onClick = { onNewGame("vs_ai") }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         MenuButton(
-            text = "Найти соперника",
+            text = stringResource(R.string.main_menu_find_opponent),
             onClick = onFindOpponent
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         MenuButton(
-            text = "Статистика",
+            text = stringResource(R.string.main_menu_statistics),
             onClick = onStatistics
         )
 
@@ -66,7 +68,7 @@ fun MainMenuScreen(onNewGame: (String) -> Unit, onFindOpponent: () -> Unit, onSt
                 .height(56.dp)
         ) {
             Text(
-                text = "Настройки",
+                text = stringResource(R.string.main_menu_settings),
                 style = MaterialTheme.typography.labelLarge
             )
         }

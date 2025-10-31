@@ -7,8 +7,10 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.imdoctor.flotilla.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -20,10 +22,10 @@ fun StatisticsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Статистика") },
+                title = { Text(stringResource(R.string.statistics_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Назад")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.common_back))
                     }
                 }
             )
@@ -39,7 +41,7 @@ fun StatisticsScreen(
         ) {
             // Общая статистика
             StatCard(
-                title = "Всего игр",
+                title = stringResource(R.string.statistics_total_games),
                 value = "0"
             )
 
@@ -48,14 +50,14 @@ fun StatisticsScreen(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 StatCard(
-                    title = "Побед",
+                    title = stringResource(R.string.statistics_wins),
                     value = "0",
                     modifier = Modifier.weight(1f),
                     color = MaterialTheme.colorScheme.primary
                 )
 
                 StatCard(
-                    title = "Поражений",
+                    title = stringResource(R.string.statistics_losses),
                     value = "0",
                     modifier = Modifier.weight(1f),
                     color = MaterialTheme.colorScheme.error
@@ -63,13 +65,13 @@ fun StatisticsScreen(
             }
 
             StatCard(
-                title = "Процент побед",
+                title = stringResource(R.string.statistics_win_rate),
                 value = "0%"
             )
 
 
             StatCard(
-                title = "Точность попаданий",
+                title = stringResource(R.string.statistics_accuracy),
                 value = "0%"
             )
 
@@ -77,7 +79,7 @@ fun StatisticsScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             Text(
-                text = "Сыграйте матч, чтобы обновить статистику",
+                text = stringResource(R.string.statistics_empty_message),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
             )

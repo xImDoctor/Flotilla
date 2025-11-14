@@ -11,9 +11,10 @@ import androidx.navigation.navArgument
 import com.imdoctor.flotilla.presentation.screens.main.MainMenuScreen
 import com.imdoctor.flotilla.presentation.screens.settings.SettingsScreen
 import com.imdoctor.flotilla.presentation.screens.stats.StatisticsScreen
-import com.imdoctor.flotilla.presentation.screens.setup.ShipSetupScreen
+import com.imdoctor.flotilla.presentation.screens.ShipSetup.ShipSetupScreen
 import com.imdoctor.flotilla.presentation.screens.game.GameScreen
 import com.imdoctor.flotilla.presentation.screens.matchmaking.FindOpponentScreen
+import com.imdoctor.flotilla.presentation.screens.registration.UserRegistrationScreen
 
 
 @Composable
@@ -23,6 +24,21 @@ fun FlotillaNavGraph(navController: NavHostController, startDestination: String 
         navController = navController,
         startDestination = startDestination
     ) {
+        // регистрация пользователя
+        composable(Screen.UserRegistration.route) {
+            UserRegistrationScreen(
+                onRegistrationComplete = {
+                    // После регистрации переходим в главное меню
+                    navController.navigate(Screen.MainMenu.route) {
+                        // Очищаем back stack, чтобы нельзя было вернуться на экран регистрации
+                        popUpTo(Screen.UserRegistration.route) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
+        }
+
         // главное меню
         composable(Screen.MainMenu.route) {
             MainMenuScreen(
@@ -51,7 +67,7 @@ fun FlotillaNavGraph(navController: NavHostController, startDestination: String 
         // настройки
         composable(Screen.Settings.route) {
             SettingsScreen(
-                onBack = { navController.popBackStack() }
+                onBackClick = { navController.popBackStack() }
             )
         }
 

@@ -6,6 +6,9 @@ package com.imdoctor.flotilla.presentation.navigation
  */
 sealed class Screen(val route: String) {
 
+    // регистрация пользователя (первый запуск)
+    data object UserRegistration : Screen("user_registration")
+
     // мэйн меню
     data object MainMenu : Screen("main_menu")
 

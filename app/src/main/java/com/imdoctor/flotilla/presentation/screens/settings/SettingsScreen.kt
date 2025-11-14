@@ -2,28 +2,42 @@ package com.imdoctor.flotilla.presentation.screens.settings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.imdoctor.flotilla.R
+import com.imdoctor.flotilla.presentation.ViewModelFactory
 
-// Композ экрана настроек
+/**
+ * Экран настроек с интеграцией Firebase и DataStore
+ * 
+ * Настройки автоматически сохраняются локально и синхронизируются с Firebase
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(onBack: () -> Unit) {
-
+fun SettingsScreen(
+    onBackClick: () -> Unit,
+    viewModel: SettingsViewModel = viewModel(factory = ViewModelFactory())
+) {
+    // Получаем значения из ViewModel через collectAsStateWithLifecycle
+    val nickname by viewModel.nickname.collectAsStateWithLifecycle()
+    val showCoordinates by viewModel.showCoordinates.collectAsStateWithLifecycle()
+    val soundEnabled by viewModel.soundEnabled.collectAsStateWithLifecycle()
+    val animationsEnabled by viewModel.animationsEnabled.collectAsStateWithLifecycle()
+    val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
+    
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.settings_title)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.common_back))
+                    TextButton(onClick = onBackClick) {
+                        Text(stringResource(R.string.common_back))
                     }
                 }
             )
@@ -37,77 +51,96 @@ fun SettingsScreen(onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Никнейм
-            val defaultNickname = stringResource(R.string.settings_nickname_default)
-            var nickname by remember { mutableStateOf(defaultNickname) }
             OutlinedTextField(
                 value = nickname,
-                onValueChange = { nickname = it },
+                onValueChange = { viewModel.updateNickname(it) },
                 label = { Text(stringResource(R.string.settings_nickname_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
-
-            HorizontalDivider()
-
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
             // Настройки сетки
             Text(
                 text = stringResource(R.string.settings_grid_title),
                 style = MaterialTheme.typography.titleMedium
             )
-
-            var showCoordinates by remember { mutableStateOf(true) }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { showCoordinates = !showCoordinates },
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(stringResource(R.string.settings_show_coordinates))
-                Switch(
-                    checked = showCoordinates,
-                    onCheckedChange = { showCoordinates = it }
-                )
-            }
-
+            
+            SettingsRow(
+                label = stringResource(R.string.settings_show_coordinates),
+                checked = showCoordinates,
+                onCheckedChange = { viewModel.toggleShowCoordinates(it) }
+            )
+            
             HorizontalDivider()
-
-            // Звук и анимации
+            
+            // Аудио и эффекты
             Text(
                 text = stringResource(R.string.settings_audio_effects_title),
                 style = MaterialTheme.typography.titleMedium
             )
-
-            var soundEnabled by remember { mutableStateOf(true) }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { soundEnabled = !soundEnabled },
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            
+            SettingsRow(
+                label = stringResource(R.string.settings_sound_effects),
+                checked = soundEnabled,
+                onCheckedChange = { viewModel.toggleSound(it) }
+            )
+            
+            SettingsRow(
+                label = stringResource(R.string.settings_animations),
+                checked = animationsEnabled,
+                onCheckedChange = { viewModel.toggleAnimations(it) }
+            )
+            
+            SettingsRow(
+                label = "Вибрация",
+                checked = vibrationEnabled,
+                onCheckedChange = { viewModel.toggleVibration(it) }
+            )
+            
+            Spacer(modifier = Modifier.weight(1f))
+            
+            // Кнопка сброса настроек
+            OutlinedButton(
+                onClick = { viewModel.resetToDefaults() },
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(stringResource(R.string.settings_sound_effects))
-                Switch(
-                    checked = soundEnabled,
-                    onCheckedChange = { soundEnabled = it }
-                )
+                Text("Сбросить к умолчаниям")
             }
-
-            var animationsEnabled by remember { mutableStateOf(true) }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { animationsEnabled = !animationsEnabled },
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(stringResource(R.string.settings_animations))
-                Switch(
-                    checked = animationsEnabled,
-                    onCheckedChange = { animationsEnabled = it }
-                )
-            }
-
         }
+    }
+}
+
+/**
+ * Переиспользуемый компонент строки настройки с Switch
+ * 
+ * @param label Текст настройки
+ * @param checked Состояние переключателя
+ * @param onCheckedChange Callback изменения состояния
+ */
+@Composable
+private fun SettingsRow(
+    label: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onCheckedChange(!checked) }
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange
+        )
     }
 }

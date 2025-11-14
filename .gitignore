@@ -100,3 +100,8 @@ keystore/
 # Settings of test devices (virtual)
 .idea/deviceManager.xml
 .idea/caches/deviceStreaming.xml
+PROJECT_STATE.md
+
+
+# google-services (db)
+google-services.json

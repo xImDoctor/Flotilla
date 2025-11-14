@@ -1,0 +1,160 @@
+rules_version = '2';
+
+/**
+ * Firestore Security Rules для Flotilla
+ * 
+ * БЕЗОПАСНОСТЬ:
+ * - Пользователи могут читать/писать только свои данные
+ * - Анонимная аутентификация требуется для всех операций
+ * - Валидация данных на уровне базы данных
+ * - Rate limiting через Firestore (встроенный)
+ */
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ========================================
+    // HELPER FUNCTIONS
+    // ========================================
+    
+    /**
+     * Проверка аутентификации пользователя
+     */
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    /**
+     * Проверка, является ли пользователь владельцем документа
+     */
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    /**
+     * Валидация строки (не пустая и не слишком длинная)
+     */
+    function isValidString(str, maxLength) {
+      return str is string 
+        && str.size() > 0 
+        && str.size() <= maxLength;
+    }
+    
+    /**
+     * Валидация числа в диапазоне
+     */
+    function isValidNumber(num, min, max) {
+      return num is number 
+        && num >= min 
+        && num <= max;
+    }
+    
+    // ========================================
+    // USER PROFILES
+    // ========================================
+    
+    match /users/{userId} {
+      // Чтение: только свой профиль
+      allow read: if isOwner(userId);
+      
+      // Создание: только свой профиль с валидными данными
+      allow create: if isOwner(userId)
+        && isValidString(request.resource.data.nickname, 50)
+        && request.resource.data.user_id == userId
+        && request.resource.data.games_played >= 0
+        && request.resource.data.wins >= 0
+        && request.resource.data.losses >= 0
+        && request.resource.data.total_shots >= 0
+        && request.resource.data.successful_shots >= 0;
+      
+      // Обновление: только свой профиль
+      allow update: if isOwner(userId)
+        && isValidString(request.resource.data.nickname, 50)
+        // Запрещаем изменение user_id
+        && request.resource.data.user_id == resource.data.user_id
+        // Статистика может только расти
+        && request.resource.data.games_played >= resource.data.games_played
+        && request.resource.data.wins >= resource.data.wins
+        && request.resource.data.losses >= resource.data.losses
+        && request.resource.data.total_shots >= resource.data.total_shots
+        && request.resource.data.successful_shots >= resource.data.successful_shots;
+      
+      // Удаление: только свой профиль
+      allow delete: if isOwner(userId);
+    }
+    
+    // ========================================
+    // USER SETTINGS
+    // ========================================
+    
+    match /user_settings/{userId} {
+      // Чтение: только свои настройки
+      allow read: if isOwner(userId);
+      
+      // Запись: только свои настройки с валидацией
+      allow create, update: if isOwner(userId)
+        && isValidString(request.resource.data.nickname, 50)
+        && isValidString(request.resource.data.selected_ship_skin, 50)
+        && request.resource.data.user_id == userId
+        && request.resource.data.show_coordinates is bool
+        && request.resource.data.sound_enabled is bool
+        && request.resource.data.animations_enabled is bool
+        && request.resource.data.vibration_enabled is bool;
+      
+      // Удаление: только свои настройки
+      allow delete: if isOwner(userId);
+    }
+    
+    // ========================================
+    // GAME HISTORY
+    // ========================================
+    
+    match /game_history/{gameId} {
+      // Чтение: только своя история
+      allow read: if isAuthenticated() 
+        && resource.data.user_id == request.auth.uid;
+      
+      // Создание: только своя история с валидацией
+      allow create: if isAuthenticated()
+        && request.resource.data.user_id == request.auth.uid
+        && isValidString(request.resource.data.game_id, 100)
+        && isValidString(request.resource.data.opponent_id, 100)
+        && isValidString(request.resource.data.opponent_nickname, 50)
+        && request.resource.data.game_mode in ['vs_ai', 'online_pvp', 'local_wifi']
+        && request.resource.data.result in ['win', 'loss', 'draw']
+        && isValidNumber(request.resource.data.duration, 0, 7200)  // Макс 2 часа
+        && isValidNumber(request.resource.data.total_shots, 0, 200)
+        && isValidNumber(request.resource.data.successful_shots, 0, 200)
+        // Успешных выстрелов не может быть больше общих
+        && request.resource.data.successful_shots <= request.resource.data.total_shots;
+      
+      // Обновление запрещено (история неизменна)
+      allow update: if false;
+      
+      // Удаление: только своя история
+      allow delete: if isAuthenticated() 
+        && resource.data.user_id == request.auth.uid;
+    }
+    
+    // ========================================
+    // MATCHMAKING (для будущего функционала)
+    // ========================================
+    
+    match /matchmaking_queue/{requestId} {
+      // Временные записи для поиска соперника
+      allow read, write: if isAuthenticated()
+        && request.resource.data.user_id == request.auth.uid
+        // TTL: автоудаление через 5 минут
+        && request.time < request.resource.data.expires_at;
+    }
+    
+    // ========================================
+    // DEFAULT DENY
+    // ========================================
+    
+    // По умолчанию запрещаем доступ ко всем остальным коллекциям
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -9,11 +9,11 @@ import com.imdoctor.flotilla.presentation.screens.registration.UserRegistrationV
 
 /**
  * Factory для создания ViewModels с зависимостями
- * 
+ *
  * Позволяет передавать репозитории в конструкторы ViewModels
  */
 class ViewModelFactory : ViewModelProvider.Factory {
-    
+
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
@@ -22,7 +22,7 @@ class ViewModelFactory : ViewModelProvider.Factory {
                     settingsRepository = AppContainer.settingsRepository
                 ) as T
             }
-            
+
             modelClass.isAssignableFrom(StatisticsViewModel::class.java) -> {
                 StatisticsViewModel(
                     userRepository = AppContainer.userRepository
@@ -31,7 +31,8 @@ class ViewModelFactory : ViewModelProvider.Factory {
 
             modelClass.isAssignableFrom(UserRegistrationViewModel::class.java) -> {
                 UserRegistrationViewModel(
-                    userRepository = AppContainer.userRepository
+                    userRepository = AppContainer.userRepository,
+                    authManager = AppContainer.authManager
                 ) as T
             }
 

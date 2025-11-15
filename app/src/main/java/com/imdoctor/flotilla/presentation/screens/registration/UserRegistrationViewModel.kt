@@ -2,6 +2,7 @@ package com.imdoctor.flotilla.presentation.screens.registration
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.imdoctor.flotilla.data.remote.firebase.FirebaseAuthManager
 import com.imdoctor.flotilla.data.repository.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +15,8 @@ import kotlinx.coroutines.launch
  * Управляет состоянием ввода никнейма и процессом создания профиля
  */
 class UserRegistrationViewModel(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val authManager: FirebaseAuthManager
 ) : ViewModel() {
 
     // Состояние никнейма
@@ -69,14 +71,25 @@ class UserRegistrationViewModel(
             _errorMessage.value = null
 
             try {
-                val result = userRepository.createUserProfile(_nickname.value.trim())
+                // Сначала аутентифицируем пользователя анонимно
+                val authResult = authManager.signInAnonymously()
 
-                result.fold(
-                    onSuccess = {
-                        _registrationComplete.value = true
+                authResult.fold(
+                    onSuccess = { firebaseUser ->
+                        // После успешной аутентификации создаём профиль
+                        val profileResult = userRepository.createUserProfile(_nickname.value.trim())
+
+                        profileResult.fold(
+                            onSuccess = {
+                                _registrationComplete.value = true
+                            },
+                            onFailure = { exception ->
+                                _errorMessage.value = exception.message ?: "Ошибка при создании профиля"
+                            }
+                        )
                     },
                     onFailure = { exception ->
-                        _errorMessage.value = exception.message ?: "Ошибка при создании профиля"
+                        _errorMessage.value = "Ошибка аутентификации: ${exception.message}"
                     }
                 )
             } catch (e: Exception) {

@@ -55,4 +55,16 @@
     <string name="settings_audio_effects_title">Аудио и эффекты</string>
     <string name="settings_sound_effects">Звуковые эффекты</string>
     <string name="settings_animations">Анимация</string>
+
+    <!-- User Registration Screen -->
+    <string name="registration_title">FLOTILLA</string>
+    <string name="registration_subtitle">Добро пожаловать!</string>
+    <string name="registration_welcome_message">Приготовьтесь к морским сражениям! Создайте свой профиль и начните путь к победе.</string>
+    <string name="registration_nickname_label">Ваш никнейм</string>
+    <string name="registration_nickname_placeholder">Введите никнейм</string>
+    <string name="registration_nickname_hint">От 3 до 20 символов (буквы, цифры, _, -)</string>
+    <string name="registration_start_button">Начать игру</string>
+    <string name="registration_creating_profile">Создаём ваш профиль…</string>
+    <string name="registration_rules_title">Правила никнейма:</string>
+    <string name="registration_rules_description">• Минимум 3 символа\n• Максимум 20 символов\n• Разрешены буквы, цифры, подчёркивание и дефис</string>
 </resources>

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.imdoctor.flotilla.di.AppContainer
 import com.imdoctor.flotilla.presentation.screens.settings.SettingsViewModel
 import com.imdoctor.flotilla.presentation.screens.stats.StatisticsViewModel
+import com.imdoctor.flotilla.presentation.screens.registration.UserRegistrationViewModel
 
 /**
  * Factory для создания ViewModels с зависимостями
@@ -27,7 +28,19 @@ class ViewModelFactory : ViewModelProvider.Factory {
                     userRepository = AppContainer.userRepository
                 ) as T
             }
-            
+
+            modelClass.isAssignableFrom(UserRegistrationViewModel::class.java) -> {
+                UserRegistrationViewModel(
+                    userRepository = AppContainer.userRepository
+                ) as T
+            }
+
+            modelClass.isAssignableFrom(StartupViewModel::class.java) -> {
+                StartupViewModel(
+                    userRepository = AppContainer.userRepository
+                ) as T
+            }
+
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         }
     }

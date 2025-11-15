@@ -11,7 +11,7 @@ import androidx.navigation.navArgument
 import com.imdoctor.flotilla.presentation.screens.main.MainMenuScreen
 import com.imdoctor.flotilla.presentation.screens.settings.SettingsScreen
 import com.imdoctor.flotilla.presentation.screens.stats.StatisticsScreen
-import com.imdoctor.flotilla.presentation.screens.ShipSetup.ShipSetupScreen
+import com.imdoctor.flotilla.presentation.screens.setup.ShipSetupScreen
 import com.imdoctor.flotilla.presentation.screens.game.GameScreen
 import com.imdoctor.flotilla.presentation.screens.matchmaking.FindOpponentScreen
 import com.imdoctor.flotilla.presentation.screens.registration.UserRegistrationScreen
@@ -137,7 +137,7 @@ fun FlotillaNavGraph(navController: NavHostController, startDestination: String 
         // статистика
         composable(Screen.Statistics.route) {
             StatisticsScreen(
-                onBack = { navController.popBackStack() }
+                onBackClick  = { navController.popBackStack() }
             )
         }
 

@@ -75,7 +75,7 @@ class UserRegistrationViewModel(
                 val authResult = authManager.signInAnonymously()
 
                 authResult.fold(
-                    onSuccess = { firebaseUser ->
+                    onSuccess = {
                         // После успешной аутентификации создаём профиль
                         val profileResult = userRepository.createUserProfile(_nickname.value.trim())
 

@@ -53,36 +53,36 @@ service cloud.firestore {
     // USER PROFILES
     // ========================================
     
-    match /users/{userId} {
-      // Чтение: только свой профиль
-      allow read: if isOwner(userId);
-      
-      // Создание: только свой профиль с валидными данными
-      allow create: if isOwner(userId)
-        && isValidString(request.resource.data.nickname, 50)
-        && request.resource.data.user_id == userId
-        && request.resource.data.games_played >= 0
-        && request.resource.data.wins >= 0
-        && request.resource.data.losses >= 0
-        && request.resource.data.total_shots >= 0
-        && request.resource.data.successful_shots >= 0;
-      
-      // Обновление: только свой профиль
-      allow update: if isOwner(userId)
-        && isValidString(request.resource.data.nickname, 50)
-        // Запрещаем изменение user_id
-        && request.resource.data.user_id == resource.data.user_id
-        // Статистика может только расти
-        && request.resource.data.games_played >= resource.data.games_played
-        && request.resource.data.wins >= resource.data.wins
-        && request.resource.data.losses >= resource.data.losses
-        && request.resource.data.total_shots >= resource.data.total_shots
-        && request.resource.data.successful_shots >= resource.data.successful_shots;
-      
-      // Удаление: только свой профиль
-      allow delete: if isOwner(userId);
-    }
-    
+match /users/{userId} {
+  // Чтение: только свой профиль
+  allow read: if isOwner(userId);
+
+  // Создание: только свой профиль с валидными данными
+  allow create: if isOwner(userId)
+    && isValidString(request.resource.data.nickname, 50)
+    && request.resource.data.user_id == userId
+    && request.resource.data.keys().hasAll(['user_id', 'nickname', 'games_played', 'wins', 'losses', 'total_shots', 'successful_shots'])
+    && request.resource.data.games_played is int
+    && request.resource.data.wins is int
+    && request.resource.data.losses is int
+    && request.resource.data.total_shots is int
+    && request.resource.data.successful_shots is int;
+
+  // Обновление: только свой профиль
+  allow update: if isOwner(userId)
+    && isValidString(request.resource.data.nickname, 50)
+    // Запрещаем изменение user_id
+    && request.resource.data.user_id == resource.data.user_id
+    // Статистика может только расти
+    && request.resource.data.games_played >= resource.data.games_played
+    && request.resource.data.wins >= resource.data.wins
+    && request.resource.data.losses >= resource.data.losses
+    && request.resource.data.total_shots >= resource.data.total_shots
+    && request.resource.data.successful_shots >= resource.data.successful_shots;
+
+  // Удаление: только свой профиль
+  allow delete: if isOwner(userId);
+}
     // ========================================
     // USER SETTINGS
     // ========================================

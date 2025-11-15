@@ -1,5 +1,6 @@
 package com.imdoctor.flotilla.data.remote.firebase.models
 
+import com.google.firebase.firestore.Exclude
 import com.google.firebase.firestore.PropertyName
 import com.google.firebase.firestore.ServerTimestamp
 import java.util.Date
@@ -51,12 +52,14 @@ data class UserProfile(
     /**
      * Вычисляемое поле: процент побед
      */
+    @get:Exclude
     val winRate: Double
         get() = if (gamesPlayed > 0) (wins.toDouble() / gamesPlayed * 100) else 0.0
     
     /**
      * Вычисляемое поле: точность стрельбы
      */
+    @get:Exclude
     val accuracy: Double
         get() = if (totalShots > 0) (successfulShots.toDouble() / totalShots * 100) else 0.0
     

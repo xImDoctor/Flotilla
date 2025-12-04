@@ -171,11 +171,20 @@ class SettingsDataStore(private val context: Context) {
     }
     
     /**
-     * Сброс всех настроек к дефолтным значениям
+     * Сброс всех настроек к дефолтным значениям (кроме никнейма)
      */
     suspend fun resetToDefaults() {
         context.dataStore.edit { preferences ->
+            // Сохраняем никнейм
+            val currentNickname = preferences[NICKNAME_KEY]
+
+            // Очищаем всё
             preferences.clear()
+
+            // Восстанавливаем никнейм
+            currentNickname?.let {
+                preferences[NICKNAME_KEY] = it
+            }
         }
     }
     

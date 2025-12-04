@@ -3,12 +3,14 @@ package com.imdoctor.flotilla.data.remote.firebase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.imdoctor.flotilla.data.remote.firebase.models.GameHistory
+import com.imdoctor.flotilla.data.remote.firebase.models.NicknameReservation
 import com.imdoctor.flotilla.data.remote.firebase.models.UserProfile
 import com.imdoctor.flotilla.data.remote.firebase.models.UserSettings
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import java.util.Locale
 
 /**
  * Менеджер для работы с Cloud Firestore
@@ -112,8 +114,15 @@ class FirestoreManager {
         }
     }
     
+    // ========================================
+    // NICKNAME RESERVATIONS (безопасная проверка уникальности)
+    // ========================================
+
     /**
-     * Проверка доступности никнейма (не занят ли другим пользователем)
+     * Проверка доступности никнейма (безопасная версия)
+     *
+     * Использует отдельную коллекцию 'nicknames' вместо query по коллекции users
+     * для соблюдения Security Rules
      *
      * @param nickname Никнейм для проверки
      * @param currentUserId ID текущего пользователя (чтобы исключить из проверки)
@@ -124,20 +133,101 @@ class FirestoreManager {
         currentUserId: String
     ): Result<Boolean> {
         return try {
-            val snapshot = db.collection(UserProfile.COLLECTION_NAME)
-                .whereEqualTo("nickname", nickname)
+            val nicknameKey = nickname.lowercase(Locale.getDefault())
+
+            val document = db.collection(NicknameReservation.COLLECTION_NAME)
+                .document(nicknameKey)
                 .get()
                 .await()
 
             // Никнейм свободен если:
-            // 1. Не найдено ни одного документа, или
-            // 2. Найден только документ текущего пользователя
-            val isAvailable = snapshot.documents.isEmpty() ||
-                (snapshot.documents.size == 1 && snapshot.documents[0].id == currentUserId)
+            // 1. Документ не существует, или
+            // 2. Документ принадлежит текущему пользователю
+            val isAvailable = !document.exists() ||
+                document.getString("user_id") == currentUserId
 
             Result.success(isAvailable)
         } catch (e: Exception) {
             com.imdoctor.flotilla.utils.Logger.e("FirestoreManager", "Failed to check nickname availability", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Резервация никнейма (атомарная операция)
+     *
+     * Использует транзакцию для атомарной проверки и резервации
+     *
+     * @param nickname Никнейм для резервации
+     * @param userId ID пользователя
+     * @return Result с успехом или ошибкой
+     */
+    suspend fun reserveNickname(
+        nickname: String,
+        userId: String
+    ): Result<Unit> {
+        return try {
+            val nicknameKey = nickname.lowercase(Locale.getDefault())
+            val nicknameRef = db.collection(NicknameReservation.COLLECTION_NAME)
+                .document(nicknameKey)
+
+            db.runTransaction { transaction ->
+                val snapshot = transaction.get(nicknameRef)
+
+                // Проверяем доступность
+                if (snapshot.exists()) {
+                    val existingUserId = snapshot.getString("user_id")
+                    if (existingUserId != userId) {
+                        throw Exception("Nickname already taken")
+                    }
+                }
+
+                // Резервируем/обновляем
+                val reservation = hashMapOf<String, Any>(
+                    "nickname" to nickname,
+                    "user_id" to userId,
+                    "created_at" to com.google.firebase.firestore.FieldValue.serverTimestamp()
+                )
+                transaction.set(nicknameRef, reservation)
+            }.await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            com.imdoctor.flotilla.utils.Logger.e("FirestoreManager", "Failed to reserve nickname", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Освобождение старого никнейма
+     *
+     * Вызывается при изменении никнейма для удаления старой резервации
+     *
+     * @param oldNickname Старый никнейм для освобождения
+     * @param userId ID пользователя (для проверки владения)
+     * @return Result с успехом или ошибкой
+     */
+    suspend fun releaseNickname(
+        oldNickname: String,
+        userId: String
+    ): Result<Unit> {
+        return try {
+            val nicknameKey = oldNickname.lowercase(Locale.getDefault())
+            val nicknameRef = db.collection(NicknameReservation.COLLECTION_NAME)
+                .document(nicknameKey)
+
+            db.runTransaction { transaction ->
+                val snapshot = transaction.get(nicknameRef)
+
+                // Удаляем только если это наш никнейм
+                if (snapshot.exists() && snapshot.getString("user_id") == userId) {
+                    transaction.delete(nicknameRef)
+                }
+            }.await()
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            com.imdoctor.flotilla.utils.Logger.e("FirestoreManager", "Failed to release nickname", e)
             Result.failure(e)
         }
     }

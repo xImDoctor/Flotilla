@@ -62,7 +62,7 @@ fun SettingsScreen(
             is NicknameUpdateResult.Error -> {
                 snackbarHostState.showSnackbar(
                     message = context.getString(result.messageResId),
-                    duration = SnackbarDuration.Long
+                    duration = SnackbarDuration.Short
                 )
                 viewModel.clearNicknameUpdateResult()
             }

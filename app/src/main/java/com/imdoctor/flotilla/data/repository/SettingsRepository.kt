@@ -42,10 +42,8 @@ class SettingsRepository(
         private const val MAX_NICKNAME_LENGTH = 20
     }
     
-    // ========================================
+
     // FLOWS для чтения настроек
-    // ========================================
-    
     val nicknameFlow: Flow<String> = localDataStore.nicknameFlow
     val showCoordinatesFlow: Flow<Boolean> = localDataStore.showCoordinatesFlow
     val soundEnabledFlow: Flow<Boolean> = localDataStore.soundEnabledFlow
@@ -53,10 +51,8 @@ class SettingsRepository(
     val vibrationEnabledFlow: Flow<Boolean> = localDataStore.vibrationEnabledFlow
     val selectedShipSkinFlow: Flow<String> = localDataStore.selectedShipSkinFlow
     
-    // ========================================
+
     // МЕТОДЫ для сохранения настроек
-    // ========================================
-    
     /**
      * Сохранение никнейма с валидацией
      *
@@ -78,24 +74,24 @@ class SettingsRepository(
             val userId = authManager.currentUserId
                 ?: return Result.failure(Exception("User not authenticated"))
 
-            // 1. Валидация никнейма
+            // Валидация никнейма
             val trimmedNickname = nickname.trim()
             if (trimmedNickname.length < MIN_NICKNAME_LENGTH ||
                 trimmedNickname.length > MAX_NICKNAME_LENGTH) {
                 return Result.failure(NicknameChangeException.InvalidNickname)
             }
 
-            // 2. Получаем текущий профиль пользователя
+            // Получаем текущий профиль пользователя
             val currentProfile = firestoreManager.getUserProfile(userId).getOrNull()
                 ?: return Result.failure(Exception("Profile not found"))
 
-            // 3. Если никнейм не изменился, просто обновляем локально
+            // Если никнейм не изменился, просто обновляем локально
             if (currentProfile.nickname == trimmedNickname) {
                 localDataStore.setNickname(trimmedNickname)
                 return Result.success(Unit)
             }
 
-            // 4. Проверка таймаута (прошло ли 5 минут с последнего изменения)
+            // Проверка таймаута (прошло ли 5 минут с последнего изменения)
             currentProfile.lastNicknameChange?.let { lastChange ->
                 val timeSinceLastChange = System.currentTimeMillis() - lastChange.time
                 if (timeSinceLastChange < NICKNAME_CHANGE_TIMEOUT_MILLIS) {
@@ -103,7 +99,7 @@ class SettingsRepository(
                 }
             }
 
-            // 5. Проверка уникальности никнейма
+            // Проверка уникальности никнейма
             val isAvailable = firestoreManager.checkNicknameAvailability(trimmedNickname, userId)
                 .getOrElse {
                     return Result.failure(NicknameChangeException.NetworkError)
@@ -113,7 +109,22 @@ class SettingsRepository(
                 return Result.failure(NicknameChangeException.NicknameAlreadyTaken)
             }
 
-            // 6. Обновляем профиль с новым никнеймом и timestamp
+            // Резервируем новый никнейм (атомарная операция)
+            firestoreManager.reserveNickname(trimmedNickname, userId)
+                .getOrElse {
+                    // Если не удалось зарезервировать - никнейм занят или сетевая ошибка
+                    return if (it.message?.contains("already taken") == true) {
+                        Result.failure(NicknameChangeException.NicknameAlreadyTaken)
+                    } else {
+                        Result.failure(NicknameChangeException.NetworkError)
+                    }
+                }
+
+            // Освобождаем старый никнейм
+            firestoreManager.releaseNickname(currentProfile.nickname, userId)
+                // Игнорируем ошибки освобождения - не критично
+
+            // Обновляем профиль с новым никнеймом и timestamp
             val updatedProfile = currentProfile.copy(
                 nickname = trimmedNickname,
                 lastNicknameChange = Date()
@@ -121,13 +132,15 @@ class SettingsRepository(
 
             firestoreManager.createOrUpdateUserProfile(updatedProfile)
                 .getOrElse {
+                    // Откатываем резервацию если не удалось обновить профиль
+                    firestoreManager.releaseNickname(trimmedNickname, userId)
                     return Result.failure(NicknameChangeException.NetworkError)
                 }
 
-            // 7. Сохраняем локально
+            // Сохраняем локально
             localDataStore.setNickname(trimmedNickname)
 
-            // 8. Синхронизируем настройки с Firebase
+            // Синхронизируем настройки с Firebase
             syncSettingsToFirebase(userId)
 
             Result.success(Unit)
@@ -223,10 +236,9 @@ class SettingsRepository(
         }
     }
     
-    // ========================================
-    // СИНХРОНИЗАЦИЯ
-    // ========================================
-    
+
+    // СИНХРОНИЗАЦИЯ НАСТРОЕЧЕК С БД
+
     /**
      * Синхронизация настроек из DataStore в Firebase
      * 
@@ -292,16 +304,20 @@ class SettingsRepository(
     }
     
     /**
-     * Сброс настроек к дефолтным значениям
+     * Сброс настроек к дефолтным значениям (кроме никнейма)
+     *
+     * Никнейм не сбрасывается, так как это требует валидации и имеет таймаут
      */
     suspend fun resetToDefaults(): Result<Unit> {
         return try {
+            // Сбрасываем настройки в DataStore (никнейм сохраняется)
             localDataStore.resetToDefaults()
-            
+
+            // Синхронизируем с Firebase
             authManager.currentUserId?.let { userId ->
                 syncSettingsToFirebase(userId)
             }
-            
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

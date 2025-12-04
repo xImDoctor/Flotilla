@@ -139,9 +139,38 @@ match /users/{userId} {
     }
     
     // ========================================
+    // NICKNAME RESERVATIONS (безопасная проверка уникальности)
+    // ========================================
+
+    match /nicknames/{nicknameKey} {
+      // Чтение: любой авторизованный пользователь может проверить доступность
+      // (требуется для проверки уникальности)
+      allow read: if isAuthenticated();
+
+      // Создание: только для своего userId
+      allow create: if isAuthenticated()
+        && isValidString(request.resource.data.nickname, 20)
+        && request.resource.data.user_id == request.auth.uid
+        // Document ID должен быть lowercase версией никнейма
+        && nicknameKey == request.resource.data.nickname.lower();
+
+      // Обновление: только свою резервацию
+      allow update: if isAuthenticated()
+        && resource.data.user_id == request.auth.uid
+        && request.resource.data.user_id == request.auth.uid
+        && isValidString(request.resource.data.nickname, 20)
+        // Document ID не должен меняться
+        && nicknameKey == request.resource.data.nickname.lower();
+
+      // Удаление: только свою резервацию
+      allow delete: if isAuthenticated()
+        && resource.data.user_id == request.auth.uid;
+    }
+
+    // ========================================
     // MATCHMAKING (для будущего функционала)
     // ========================================
-    
+
     match /matchmaking_queue/{requestId} {
       // Временные записи для поиска соперника
       allow read, write: if isAuthenticated()

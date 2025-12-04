@@ -27,7 +27,9 @@ class UserRepository(
     // ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ
     /**
      * Создание нового профиля пользователя
-     * 
+     *
+     * Резервирует никнейм и создаёт профиль атомарно
+     *
      * @param nickname Никнейм пользователя
      * @return Result с профилем или ошибкой
      */
@@ -36,6 +38,19 @@ class UserRepository(
             val userId = authManager.currentUserId
                 ?: return Result.failure(Exception("User not authenticated"))
 
+            // 1. Резервируем никнейм (атомарная операция с проверкой)
+            firestoreManager.reserveNickname(nickname, userId)
+                .getOrElse {
+                    return Result.failure(
+                        if (it.message?.contains("already taken") == true) {
+                            Exception("Никнейм уже занят")
+                        } else {
+                            Exception("Не удалось зарезервировать никнейм: ${it.message}")
+                        }
+                    )
+                }
+
+            // 2. Создаём профиль
             val profile = UserProfile(
                 userId = userId,
                 nickname = nickname,
@@ -45,11 +60,16 @@ class UserRepository(
                 wins = 0,
                 losses = 0,
                 totalShots = 0,
-                successfulShots = 0
+                successfulShots = 0,
+                lastNicknameChange = null  // Первая установка - без timestamp
             )
 
             firestoreManager.createOrUpdateUserProfile(profile)
-                .getOrThrow()
+                .getOrElse {
+                    // Откатываем резервацию если не удалось создать профиль
+                    firestoreManager.releaseNickname(nickname, userId)
+                    return Result.failure(it)
+                }
 
             Result.success(profile)
         } catch (e: Exception) {
@@ -210,14 +230,25 @@ class UserRepository(
     
     /**
      * Удаление всех данных пользователя
-     * 
+     *
      * НЕОБРАТИМАЯ ОПЕРАЦИЯ, ПОСКОЛЬКУ СТИРАЕМ ИЗ БД
+     * Удаляет профиль, настройки, историю игр и резервацию никнейма
      */
     suspend fun deleteUserData(): Result<Unit> {
         return try {
             val userId = authManager.currentUserId
                 ?: return Result.failure(Exception("User not authenticated"))
-            
+
+            // Получаем никнейм для освобождения резервации
+            val profile = firestoreManager.getUserProfile(userId).getOrNull()
+
+            // Освобождаем резервацию никнейма
+            profile?.nickname?.let { nickname ->
+                firestoreManager.releaseNickname(nickname, userId)
+                    // Игнорируем ошибки - продолжаем удаление
+            }
+
+            // Удаляем остальные данные
             firestoreManager.deleteUserData(userId)
         } catch (e: Exception) {
             Result.failure(e)

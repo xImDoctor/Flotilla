@@ -23,10 +23,8 @@ class UserRepository(
     private val authManager: FirebaseAuthManager
 ) {
     
-    // ========================================
+
     // ПРОФИЛЬ ПОЛЬЗОВАТЕЛЯ
-    // ========================================
-    
     /**
      * Создание нового профиля пользователя
      * 
@@ -37,15 +35,22 @@ class UserRepository(
         return try {
             val userId = authManager.currentUserId
                 ?: return Result.failure(Exception("User not authenticated"))
-            
+
             val profile = UserProfile(
                 userId = userId,
-                nickname = nickname
+                nickname = nickname,
+                createdAt = null,       // ServerTimestamp установится автоматически
+                lastActive = null,      // аналогично
+                gamesPlayed = 0,
+                wins = 0,
+                losses = 0,
+                totalShots = 0,
+                successfulShots = 0
             )
-            
+
             firestoreManager.createOrUpdateUserProfile(profile)
                 .getOrThrow()
-            
+
             Result.success(profile)
         } catch (e: Exception) {
             Result.failure(e)
@@ -69,7 +74,7 @@ class UserRepository(
     }
     
     /**
-     * Реалтайм отслеживание профиля пользователя
+     * Рилтайм отслеживание профиля пользователя
      * 
      * @return Flow с обновлениями профиля
      */
@@ -100,9 +105,8 @@ class UserRepository(
         }
     }
     
-    // ========================================
+
     // СТАТИСТИКА ИГР
-    // ========================================
     
     /**
      * Сохранение завершённой игры
@@ -181,7 +185,7 @@ class UserRepository(
     }
     
     /**
-     * Реалтайм отслеживание истории игр
+     * Рилтайм отслеживание истории игр
      * 
      * @param limit Максимальное количество игр
      * @return Flow с обновлениями истории или null если не аутентифицирован
@@ -190,10 +194,8 @@ class UserRepository(
         val userId = authManager.currentUserId ?: return null
         return firestoreManager.observeUserGameHistory(userId, limit)
     }
-    
-    // ========================================
+
     // УТИЛИТЫ
-    // ========================================
     
     /**
      * Проверка, создан ли профиль пользователя
@@ -209,7 +211,7 @@ class UserRepository(
     /**
      * Удаление всех данных пользователя
      * 
-     * ВНИМАНИЕ: Необратимая операция!
+     * НЕОБРАТИМАЯ ОПЕРАЦИЯ, ПОСКОЛЬКУ СТИРАЕМ ИЗ БД
      */
     suspend fun deleteUserData(): Result<Unit> {
         return try {

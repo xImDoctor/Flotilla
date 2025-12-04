@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.imdoctor.flotilla.data.remote.firebase.FirebaseAuthManager
 import com.imdoctor.flotilla.data.repository.UserRepository
+import com.imdoctor.flotilla.utils.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,6 +19,10 @@ class UserRegistrationViewModel(
     private val userRepository: UserRepository,
     private val authManager: FirebaseAuthManager
 ) : ViewModel() {
+
+    companion object {
+        private const val TAG = "UserRegistrationVM"
+    }
 
     // Состояние никнейма
     private val _nickname = MutableStateFlow("")
@@ -45,7 +50,7 @@ class UserRegistrationViewModel(
             .take(20)
         _nickname.value = sanitized
 
-        // Сброс ошибки при изменении никнейма
+        // Сброс ошибки при изменении ника
         _errorMessage.value = null
     }
 
@@ -84,16 +89,30 @@ class UserRegistrationViewModel(
                                 _registrationComplete.value = true
                             },
                             onFailure = { exception ->
-                                _errorMessage.value = exception.message ?: "Ошибка при создании профиля"
+                                // Подробное логирование ошибки в дебаг моде для разработчика (т.е. меня, только в debug)
+                                Logger.e(TAG, "Failed to create user profile", exception)
+
+                                // Понятные сообщение для вывода пользователю
+                                val userMessage = when {
+                                    exception.message?.contains("PERMISSION_DENIED") == true ->
+                                        "Ошибка доступа к серверу. Попробуйте позже"
+                                    exception.message?.contains("UNAVAILABLE") == true ->
+                                        "Проверьте ваше интернет соединение"
+                                    exception.message?.contains("DEADLINE_EXCEEDED") == true ->
+                                        "Превышено время ожидания. Проверьте интернет соединение"
+                                    else -> "Не удалось создать профиль. Попробуйте снова"
+                                }
+                                _errorMessage.value = userMessage
                             }
                         )
                     },
                     onFailure = { exception ->
-                        _errorMessage.value = "Ошибка аутентификации: ${exception.message}"
+                        Logger.e(TAG, "Authentication failed", exception)
+                        _errorMessage.value = "Ошибка подключения. Проверьте интернет соединение"
                     }
                 )
             } catch (e: Exception) {
-                _errorMessage.value = e.message ?: "Неизвестная ошибка"
+                _errorMessage.value = e.message ?: "Неопознанная ошибка (как енот)"
             } finally {
                 _isLoading.value = false
             }

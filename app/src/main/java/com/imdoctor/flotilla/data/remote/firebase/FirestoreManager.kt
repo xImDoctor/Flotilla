@@ -113,8 +113,38 @@ class FirestoreManager {
     }
     
     /**
+     * Проверка доступности никнейма (не занят ли другим пользователем)
+     *
+     * @param nickname Никнейм для проверки
+     * @param currentUserId ID текущего пользователя (чтобы исключить из проверки)
+     * @return Result с true если никнейм свободен, false если занят
+     */
+    suspend fun checkNicknameAvailability(
+        nickname: String,
+        currentUserId: String
+    ): Result<Boolean> {
+        return try {
+            val snapshot = db.collection(UserProfile.COLLECTION_NAME)
+                .whereEqualTo("nickname", nickname)
+                .get()
+                .await()
+
+            // Никнейм свободен если:
+            // 1. Не найдено ни одного документа, или
+            // 2. Найден только документ текущего пользователя
+            val isAvailable = snapshot.documents.isEmpty() ||
+                (snapshot.documents.size == 1 && snapshot.documents[0].id == currentUserId)
+
+            Result.success(isAvailable)
+        } catch (e: Exception) {
+            com.imdoctor.flotilla.utils.Logger.e("FirestoreManager", "Failed to check nickname availability", e)
+            Result.failure(e)
+        }
+    }
+
+    /**
      * Обновление статистики пользователя после игры
-     * 
+     *
      * @param userId ID пользователя
      * @param won Победил ли пользователь
      * @param totalShots Всего выстрелов

@@ -58,7 +58,12 @@ data class UserProfile(
 
     @get:PropertyName("successful_shots")
     @set:PropertyName("successful_shots")
-    var successfulShots: Int = 0
+    var successfulShots: Int = 0,
+
+    // Таймстамп последнего изменения никнейма (для таймаута 5 минут)
+    @get:PropertyName("last_nickname_change")
+    @set:PropertyName("last_nickname_change")
+    var lastNicknameChange: Date? = null
 ) {
     /**
      * Вычисляемое поле: процент побед

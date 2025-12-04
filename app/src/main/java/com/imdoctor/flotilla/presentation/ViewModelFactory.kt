@@ -19,7 +19,8 @@ class ViewModelFactory : ViewModelProvider.Factory {
         return when {
             modelClass.isAssignableFrom(SettingsViewModel::class.java) -> {
                 SettingsViewModel(
-                    settingsRepository = AppContainer.settingsRepository
+                    settingsRepository = AppContainer.settingsRepository,
+                    userRepository = AppContainer.userRepository
                 ) as T
             }
 
@@ -32,7 +33,8 @@ class ViewModelFactory : ViewModelProvider.Factory {
             modelClass.isAssignableFrom(UserRegistrationViewModel::class.java) -> {
                 UserRegistrationViewModel(
                     userRepository = AppContainer.userRepository,
-                    authManager = AppContainer.authManager
+                    authManager = AppContainer.authManager,
+                    settingsRepository = AppContainer.settingsRepository
                 ) as T
             }
 

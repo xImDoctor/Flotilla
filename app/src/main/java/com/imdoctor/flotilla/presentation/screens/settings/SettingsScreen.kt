@@ -2,10 +2,13 @@ package com.imdoctor.flotilla.presentation.screens.settings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -30,8 +33,45 @@ fun SettingsScreen(
     val soundEnabled by viewModel.soundEnabled.collectAsStateWithLifecycle()
     val animationsEnabled by viewModel.animationsEnabled.collectAsStateWithLifecycle()
     val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
-    
+    val nicknameUpdateResult by viewModel.nicknameUpdateResult.collectAsStateWithLifecycle()
+
+    // Локальное состояние для редактирования никнейма
+    var nicknameInput by remember { mutableStateOf(nickname) }
+
+    // Обновляем локальный input когда меняется nickname из ViewModel
+    LaunchedEffect(nickname) {
+        nicknameInput = nickname
+    }
+
+    // Snackbar host для показа сообщений
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Context для доступа к ресурсам
+    val context = LocalContext.current
+
+    // Показываем Snackbar при изменении результата
+    LaunchedEffect(nicknameUpdateResult) {
+        when (val result = nicknameUpdateResult) {
+            is NicknameUpdateResult.Success -> {
+                snackbarHostState.showSnackbar(
+                    message = context.getString(R.string.settings_nickname_success),
+                    duration = SnackbarDuration.Short
+                )
+                viewModel.clearNicknameUpdateResult()
+            }
+            is NicknameUpdateResult.Error -> {
+                snackbarHostState.showSnackbar(
+                    message = context.getString(result.messageResId),
+                    duration = SnackbarDuration.Long
+                )
+                viewModel.clearNicknameUpdateResult()
+            }
+            else -> { /* Idle или Loading */ }
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.settings_title)) },
@@ -50,15 +90,50 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Никнейм
-            OutlinedTextField(
-                value = nickname,
-                onValueChange = { viewModel.updateNickname(it) },
-                label = { Text(stringResource(R.string.settings_nickname_label)) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+            // Никнейм с кнопкой сохранения
+            Text(
+                text = stringResource(R.string.settings_nickname_title),
+                style = MaterialTheme.typography.titleMedium
             )
-            
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                OutlinedTextField(
+                    value = nicknameInput,
+                    onValueChange = { nicknameInput = it },
+                    label = { Text(stringResource(R.string.settings_nickname_label)) },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true,
+                    enabled = nicknameUpdateResult !is NicknameUpdateResult.Loading,
+                    supportingText = {
+                        Text(stringResource(R.string.settings_nickname_hint))
+                    }
+                )
+
+                // Кнопка сохранения
+                FilledTonalButton(
+                    onClick = { viewModel.updateNickname(nicknameInput) },
+                    enabled = nicknameUpdateResult !is NicknameUpdateResult.Loading &&
+                            nicknameInput.trim() != nickname,
+                    modifier = Modifier.height(56.dp)
+                ) {
+                    if (nicknameUpdateResult is NicknameUpdateResult.Loading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = stringResource(R.string.settings_nickname_save)
+                        )
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
             
             // Настройки сетки
@@ -66,7 +141,7 @@ fun SettingsScreen(
                 text = stringResource(R.string.settings_grid_title),
                 style = MaterialTheme.typography.titleMedium
             )
-            
+
             SettingsRow(
                 label = stringResource(R.string.settings_show_coordinates),
                 checked = showCoordinates,
@@ -94,7 +169,7 @@ fun SettingsScreen(
             )
             
             SettingsRow(
-                label = "Вибрация",
+                label = stringResource(R.string.settings_vibration),
                 checked = vibrationEnabled,
                 onCheckedChange = { viewModel.toggleVibration(it) }
             )
@@ -106,7 +181,7 @@ fun SettingsScreen(
                 onClick = { viewModel.resetToDefaults() },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Сбросить к умолчаниям")
+                Text(stringResource(R.string.settings_set_default))
             }
         }
     }

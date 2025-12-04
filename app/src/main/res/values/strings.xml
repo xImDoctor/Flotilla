@@ -50,11 +50,21 @@
     <string name="settings_title">Настройки</string>
     <string name="settings_nickname_default">Player</string>
     <string name="settings_nickname_label">Никнейм</string>
+    <string name="settings_nickname_title">Никнейм</string>
+    <string name="settings_nickname_hint">От 3 до 20 символов</string>
+    <string name="settings_nickname_save">Сохранить</string>
+    <string name="settings_nickname_success">Никнейм успешно изменён</string>
+    <string name="settings_nickname_error_timeout">Можно менять никнейм не чаще одного раза в 5 минут</string>
+    <string name="settings_nickname_error_taken">Этот никнейм уже занят</string>
+    <string name="settings_nickname_error_invalid">Никнейм должен содержать от 3 до 20 символов</string>
+    <string name="settings_nickname_error_network">Ошибка сети. Проверьте подключение</string>
     <string name="settings_grid_title">Настройки сетки</string>
     <string name="settings_show_coordinates">Показывать координаты</string>
     <string name="settings_audio_effects_title">Аудио и эффекты</string>
     <string name="settings_sound_effects">Звуковые эффекты</string>
     <string name="settings_animations">Анимация</string>
+    <string name="settings_vibration">Вибрация</string>
+    <string name="settings_set_default">По умолчанию</string>
 
     <!-- User Registration Screen -->
     <string name="registration_title">FLOTILLA</string>

@@ -3,6 +3,7 @@ package com.imdoctor.flotilla.presentation.screens.registration
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.imdoctor.flotilla.data.remote.firebase.FirebaseAuthManager
+import com.imdoctor.flotilla.data.repository.SettingsRepository
 import com.imdoctor.flotilla.data.repository.UserRepository
 import com.imdoctor.flotilla.utils.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +18,8 @@ import kotlinx.coroutines.launch
  */
 class UserRegistrationViewModel(
     private val userRepository: UserRepository,
-    private val authManager: FirebaseAuthManager
+    private val authManager: FirebaseAuthManager,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     companion object {
@@ -86,6 +88,8 @@ class UserRegistrationViewModel(
 
                         profileResult.fold(
                             onSuccess = {
+                                // Сохраняем никнейм в настройки (DataStore + Firebase)
+                                settingsRepository.setNickname(_nickname.value.trim())
                                 _registrationComplete.value = true
                             },
                             onFailure = { exception ->

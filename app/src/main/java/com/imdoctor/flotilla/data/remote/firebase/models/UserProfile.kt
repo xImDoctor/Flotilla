@@ -20,34 +20,34 @@ import java.util.Date
  */
 data class UserProfile(
     @PropertyName("user_id")
-    val userId: String = "",
-    
+    var userId: String = "",
+
     @PropertyName("nickname")
-    val nickname: String = "Player",
-    
+    var nickname: String = "Player",
+
     @PropertyName("created_at")
     @ServerTimestamp
-    val createdAt: Date? = null,
-    
+    var createdAt: Date? = null,
+
     @PropertyName("last_active")
     @ServerTimestamp
-    val lastActive: Date? = null,
-    
+    var lastActive: Date? = null,
+
     // Статистика
     @PropertyName("games_played")
-    val gamesPlayed: Int = 0,
-    
+    var gamesPlayed: Int = 0,
+
     @PropertyName("wins")
-    val wins: Int = 0,
-    
+    var wins: Int = 0,
+
     @PropertyName("losses")
-    val losses: Int = 0,
-    
+    var losses: Int = 0,
+
     @PropertyName("total_shots")
-    val totalShots: Int = 0,
-    
+    var totalShots: Int = 0,
+
     @PropertyName("successful_shots")
-    val successfulShots: Int = 0
+    var successfulShots: Int = 0
 ) {
     /**
      * Вычисляемое поле: процент побед

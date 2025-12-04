@@ -61,7 +61,9 @@ match /users/{userId} {
   allow create: if isOwner(userId)
     && isValidString(request.resource.data.nickname, 50)
     && request.resource.data.user_id == userId
+    // Обязательные поля
     && request.resource.data.keys().hasAll(['user_id', 'nickname', 'games_played', 'wins', 'losses', 'total_shots', 'successful_shots'])
+    // Валидация типов обязательных полей
     && request.resource.data.games_played is int
     && request.resource.data.wins is int
     && request.resource.data.losses is int

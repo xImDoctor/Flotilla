@@ -17,28 +17,28 @@ import com.google.firebase.firestore.PropertyName
  */
 data class UserSettings(
     @PropertyName("user_id")
-    val userId: String = "",
-    
+    var userId: String = "",
+
     @PropertyName("nickname")
-    val nickname: String = "Player",
-    
+    var nickname: String = "Player",
+
     // Настройки сетки
     @PropertyName("show_coordinates")
-    val showCoordinates: Boolean = true,
-    
+    var showCoordinates: Boolean = true,
+
     // Аудио и эффекты
     @PropertyName("sound_enabled")
-    val soundEnabled: Boolean = true,
-    
+    var soundEnabled: Boolean = true,
+
     @PropertyName("animations_enabled")
-    val animationsEnabled: Boolean = true,
-    
+    var animationsEnabled: Boolean = true,
+
     @PropertyName("vibration_enabled")
-    val vibrationEnabled: Boolean = true,
-    
+    var vibrationEnabled: Boolean = true,
+
     // Кастомизация
     @PropertyName("selected_ship_skin")
-    val selectedShipSkin: String = "default"
+    var selectedShipSkin: String = "default"
 ) {
     companion object {
         // Firestore collection name

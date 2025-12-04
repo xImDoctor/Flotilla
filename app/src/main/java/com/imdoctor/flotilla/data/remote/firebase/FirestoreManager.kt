@@ -34,13 +34,36 @@ class FirestoreManager {
      */
     suspend fun createOrUpdateUserProfile(profile: UserProfile): Result<Unit> {
         return try {
+            // Логирование данных перед отправкой (только в debug)
+            com.imdoctor.flotilla.utils.Logger.d(
+                "FirestoreManager",
+                "Creating user profile: userId=${profile.userId}, nickname=${profile.nickname}, " +
+                        "gamesPlayed=${profile.gamesPlayed}, wins=${profile.wins}, losses=${profile.losses}, " +
+                        "totalShots=${profile.totalShots}, successfulShots=${profile.successfulShots}"
+            )
+
+            // Создаем Map вручную, исключая null ServerTimestamp поля
+            val data = hashMapOf<String, Any>(
+                "user_id" to profile.userId,
+                "nickname" to profile.nickname,
+                "games_played" to profile.gamesPlayed,
+                "wins" to profile.wins,
+                "losses" to profile.losses,
+                "total_shots" to profile.totalShots,
+                "successful_shots" to profile.successfulShots,
+                "created_at" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
+                "last_active" to com.google.firebase.firestore.FieldValue.serverTimestamp()
+            )
+
             db.collection(UserProfile.COLLECTION_NAME)
                 .document(profile.userId)
-                .set(profile, SetOptions.merge())  // merge = обновит только указанные поля
+                .set(data, SetOptions.merge())
                 .await()
-            
+
+            com.imdoctor.flotilla.utils.Logger.i("FirestoreManager", "User profile created successfully")
             Result.success(Unit)
         } catch (e: Exception) {
+            com.imdoctor.flotilla.utils.Logger.e("FirestoreManager", "Failed to create user profile", e)
             Result.failure(e)
         }
     }

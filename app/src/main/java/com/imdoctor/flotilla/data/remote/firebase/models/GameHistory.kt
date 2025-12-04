@@ -20,35 +20,35 @@ import java.util.Date
  */
 data class GameHistory(
     @PropertyName("game_id")
-    val gameId: String = "",
-    
+    var gameId: String = "",
+
     @PropertyName("user_id")
-    val userId: String = "",
-    
+    var userId: String = "",
+
     @PropertyName("opponent_id")
-    val opponentId: String = "",
-    
+    var opponentId: String = "",
+
     @PropertyName("opponent_nickname")
-    val opponentNickname: String = "",
-    
+    var opponentNickname: String = "",
+
     @PropertyName("game_mode")
-    val gameMode: GameMode = GameMode.VS_AI,
-    
+    var gameMode: GameMode = GameMode.VS_AI,
+
     @PropertyName("result")
-    val result: GameResult = GameResult.LOSS,
-    
+    var result: GameResult = GameResult.LOSS,
+
     @PropertyName("played_at")
     @ServerTimestamp
-    val playedAt: Date? = null,
-    
+    var playedAt: Date? = null,
+
     @PropertyName("duration")
-    val duration: Long = 0L,  // в секундах
-    
+    var duration: Long = 0L,  // в секундах
+
     @PropertyName("total_shots")
-    val totalShots: Int = 0,
-    
+    var totalShots: Int = 0,
+
     @PropertyName("successful_shots")
-    val successfulShots: Int = 0
+    var successfulShots: Int = 0
 ) {
     companion object {
         // Firestore collection name

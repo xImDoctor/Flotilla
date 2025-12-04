@@ -16,28 +16,35 @@ import com.google.firebase.firestore.PropertyName
  * @property selectedShipSkin Выбранный скин кораблей
  */
 data class UserSettings(
-    @PropertyName("user_id")
+    @get:PropertyName("user_id")
+    @set:PropertyName("user_id")
     var userId: String = "",
 
-    @PropertyName("nickname")
+    @get:PropertyName("nickname")
+    @set:PropertyName("nickname")
     var nickname: String = "Player",
 
     // Настройки сетки
-    @PropertyName("show_coordinates")
+    @get:PropertyName("show_coordinates")
+    @set:PropertyName("show_coordinates")
     var showCoordinates: Boolean = true,
 
     // Аудио и эффекты
-    @PropertyName("sound_enabled")
+    @get:PropertyName("sound_enabled")
+    @set:PropertyName("sound_enabled")
     var soundEnabled: Boolean = true,
 
-    @PropertyName("animations_enabled")
+    @get:PropertyName("animations_enabled")
+    @set:PropertyName("animations_enabled")
     var animationsEnabled: Boolean = true,
 
-    @PropertyName("vibration_enabled")
+    @get:PropertyName("vibration_enabled")
+    @set:PropertyName("vibration_enabled")
     var vibrationEnabled: Boolean = true,
 
     // Кастомизация
-    @PropertyName("selected_ship_skin")
+    @get:PropertyName("selected_ship_skin")
+    @set:PropertyName("selected_ship_skin")
     var selectedShipSkin: String = "default"
 ) {
     companion object {

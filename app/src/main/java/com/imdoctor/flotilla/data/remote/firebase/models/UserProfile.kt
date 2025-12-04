@@ -7,7 +7,9 @@ import java.util.Date
 
 /**
  * Модель профиля пользователя в Firestore
- * 
+ *
+ * Firestore требует конструктор без параметров для десериализации
+ *
  * @property userId Уникальный ID пользователя (Firebase Auth UID)
  * @property nickname Никнейм игрока
  * @property createdAt Дата создания профиля (автоматически)
@@ -19,34 +21,43 @@ import java.util.Date
  * @property successfulShots Успешных выстрелов (попадания)
  */
 data class UserProfile(
-    @PropertyName("user_id")
+    @get:PropertyName("user_id")
+    @set:PropertyName("user_id")
     var userId: String = "",
 
-    @PropertyName("nickname")
+    @get:PropertyName("nickname")
+    @set:PropertyName("nickname")
     var nickname: String = "Player",
 
-    @PropertyName("created_at")
+    @get:PropertyName("created_at")
+    @set:PropertyName("created_at")
     @ServerTimestamp
     var createdAt: Date? = null,
 
-    @PropertyName("last_active")
+    @get:PropertyName("last_active")
+    @set:PropertyName("last_active")
     @ServerTimestamp
     var lastActive: Date? = null,
 
     // Статистика
-    @PropertyName("games_played")
+    @get:PropertyName("games_played")
+    @set:PropertyName("games_played")
     var gamesPlayed: Int = 0,
 
-    @PropertyName("wins")
+    @get:PropertyName("wins")
+    @set:PropertyName("wins")
     var wins: Int = 0,
 
-    @PropertyName("losses")
+    @get:PropertyName("losses")
+    @set:PropertyName("losses")
     var losses: Int = 0,
 
-    @PropertyName("total_shots")
+    @get:PropertyName("total_shots")
+    @set:PropertyName("total_shots")
     var totalShots: Int = 0,
 
-    @PropertyName("successful_shots")
+    @get:PropertyName("successful_shots")
+    @set:PropertyName("successful_shots")
     var successfulShots: Int = 0
 ) {
     /**

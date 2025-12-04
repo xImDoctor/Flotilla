@@ -19,35 +19,45 @@ import java.util.Date
  * @property successfulShots Успешных выстрелов
  */
 data class GameHistory(
-    @PropertyName("game_id")
+    @get:PropertyName("game_id")
+    @set:PropertyName("game_id")
     var gameId: String = "",
 
-    @PropertyName("user_id")
+    @get:PropertyName("user_id")
+    @set:PropertyName("user_id")
     var userId: String = "",
 
-    @PropertyName("opponent_id")
+    @get:PropertyName("opponent_id")
+    @set:PropertyName("opponent_id")
     var opponentId: String = "",
 
-    @PropertyName("opponent_nickname")
+    @get:PropertyName("opponent_nickname")
+    @set:PropertyName("opponent_nickname")
     var opponentNickname: String = "",
 
-    @PropertyName("game_mode")
+    @get:PropertyName("game_mode")
+    @set:PropertyName("game_mode")
     var gameMode: GameMode = GameMode.VS_AI,
 
-    @PropertyName("result")
+    @get:PropertyName("result")
+    @set:PropertyName("result")
     var result: GameResult = GameResult.LOSS,
 
-    @PropertyName("played_at")
+    @get:PropertyName("played_at")
+    @set:PropertyName("played_at")
     @ServerTimestamp
     var playedAt: Date? = null,
 
-    @PropertyName("duration")
+    @get:PropertyName("duration")
+    @set:PropertyName("duration")
     var duration: Long = 0L,  // в секундах
 
-    @PropertyName("total_shots")
+    @get:PropertyName("total_shots")
+    @set:PropertyName("total_shots")
     var totalShots: Int = 0,
 
-    @PropertyName("successful_shots")
+    @get:PropertyName("successful_shots")
+    @set:PropertyName("successful_shots")
     var successfulShots: Int = 0
 ) {
     companion object {

@@ -6,6 +6,7 @@ import com.imdoctor.flotilla.di.AppContainer
 import com.imdoctor.flotilla.presentation.screens.settings.SettingsViewModel
 import com.imdoctor.flotilla.presentation.screens.stats.StatisticsViewModel
 import com.imdoctor.flotilla.presentation.screens.registration.UserRegistrationViewModel
+import com.imdoctor.flotilla.presentation.screens.matchmaking.MatchmakingViewModel
 
 /**
  * Factory для создания ViewModels с зависимостями
@@ -40,6 +41,13 @@ class ViewModelFactory : ViewModelProvider.Factory {
 
             modelClass.isAssignableFrom(StartupViewModel::class.java) -> {
                 StartupViewModel(
+                    userRepository = AppContainer.userRepository
+                ) as T
+            }
+
+            modelClass.isAssignableFrom(MatchmakingViewModel::class.java) -> {
+                MatchmakingViewModel(
+                    webSocketManager = AppContainer.webSocketManager,
                     userRepository = AppContainer.userRepository
                 ) as T
             }

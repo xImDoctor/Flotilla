@@ -95,17 +95,40 @@ class UserRepository(
     
     /**
      * Рилтайм отслеживание профиля пользователя
-     * 
+     *
      * @return Flow с обновлениями профиля
      */
     fun observeUserProfile(): Flow<UserProfile?>? {
         val userId = authManager.currentUserId ?: return null
         return firestoreManager.observeUserProfile(userId)
     }
-    
+
+    /**
+     * Получить Firebase ID токен текущего пользователя
+     *
+     * Используется для аутентификации на WebSocket сервере
+     *
+     * @param forceRefresh Принудительно обновить токен
+     * @return Firebase ID token или null если пользователь не аутентифицирован
+     */
+    suspend fun getCurrentUserToken(forceRefresh: Boolean = false): String? {
+        return authManager.getIdToken(forceRefresh).getOrNull()
+    }
+
+    /**
+     * Получить текущий профиль пользователя (без обёрткиResult)
+     *
+     * Удобный метод для использования в ViewModel
+     *
+     * @return UserProfile или null
+     */
+    suspend fun getCurrentUserProfile(): UserProfile? {
+        return getUserProfile().getOrNull()
+    }
+
     /**
      * Обновление никнейма пользователя
-     * 
+     *
      * @param nickname Новый никнейм
      */
     suspend fun updateNickname(nickname: String): Result<Unit> {

@@ -4,6 +4,7 @@ import android.content.Context
 import com.imdoctor.flotilla.data.local.preferences.SettingsDataStore
 import com.imdoctor.flotilla.data.remote.firebase.FirebaseAuthManager
 import com.imdoctor.flotilla.data.remote.firebase.FirestoreManager
+import com.imdoctor.flotilla.data.remote.websocket.WebSocketManager
 import com.imdoctor.flotilla.data.repository.SettingsRepository
 import com.imdoctor.flotilla.data.repository.UserRepository
 
@@ -32,10 +33,8 @@ object AppContainer {
         applicationContext = context.applicationContext
     }
     
-    // ========================================
+
     // МЕНЕДЖЕРЫ (синглтоны)
-    // ========================================
-    
     /**
      * Firebase Authentication Manager
      */
@@ -59,11 +58,16 @@ object AppContainer {
         }
         SettingsDataStore(applicationContext!!)
     }
-    
-    // ========================================
+
+    /**
+     * WebSocket Manager для онлайн игр
+     */
+    val webSocketManager: WebSocketManager by lazy {
+        WebSocketManager()
+    }
+
+
     // РЕПОЗИТОРИИ (синглтоны)
-    // ========================================
-    
     /**
      * Settings Repository
      */

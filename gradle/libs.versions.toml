@@ -18,6 +18,9 @@ googleServices = "4.4.2"
 # DataStore для локальных настроек
 datastorePreferences = "1.1.1"
 
+# Kotlinx Serialization для JSON
+kotlinxSerialization = "1.7.3"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -47,10 +50,14 @@ firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashly
 # DataStore для локального хранения настроек
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastorePreferences" }
 
+# Kotlinx Serialization для JSON
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 
 # Google Services plugin для подключения google-services.json
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }

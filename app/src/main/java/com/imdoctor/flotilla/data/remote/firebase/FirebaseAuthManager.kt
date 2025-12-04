@@ -84,13 +84,36 @@ class FirebaseAuthManager {
     
     /**
      * Удаление аккаунта пользователя
-     * 
+     *
      * ВНИМАНИЕ: Также удалит все данные пользователя из Firestore
      */
     suspend fun deleteAccount(): Result<Unit> {
         return try {
             currentUser?.delete()?.await()
             Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Получить Firebase ID токен для аутентификации на сервере
+     *
+     * Токен используется для WebSocket и REST API аутентификации
+     *
+     * @param forceRefresh Принудительно обновить токен (по умолчанию false)
+     * @return Result с токеном или ошибкой
+     */
+    suspend fun getIdToken(forceRefresh: Boolean = false): Result<String> {
+        return try {
+            val user = currentUser
+                ?: return Result.failure(Exception("User not authenticated"))
+
+            val tokenResult = user.getIdToken(forceRefresh).await()
+            val token = tokenResult.token
+                ?: return Result.failure(Exception("Token is null"))
+
+            Result.success(token)
         } catch (e: Exception) {
             Result.failure(e)
         }

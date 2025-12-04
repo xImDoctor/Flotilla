@@ -2,7 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    
+    alias(libs.plugins.kotlin.serialization)
+
     // Google Services plugin для обработки google-services.json
     alias(libs.plugins.google.services)
 }
@@ -19,6 +20,31 @@ android {
         versionName = "0.1.0-alpha"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Читаем конфигурацию сервера из local.properties
+        val localProperties = File(rootProject.projectDir, "local.properties")
+        val properties = java.util.Properties()
+
+        if (localProperties.exists()) {
+            properties.load(localProperties.inputStream())
+        }
+
+        // Добавляем в BuildConfig (доступно в коде как BuildConfig.SERVER_LOCAL_IP)
+        buildConfigField(
+            "String",
+            "SERVER_LOCAL_IP",
+            "\"${properties.getProperty("flotilla.server.local.ip", "192.168.1.100")}\""
+        )
+        buildConfigField(
+            "int",
+            "SERVER_LOCAL_PORT",
+            properties.getProperty("flotilla.server.local.port", "8000")
+        )
+        buildConfigField(
+            "String",
+            "SERVER_PRODUCTION_URL",
+            "\"${properties.getProperty("flotilla.server.production.url", "https://flotilla-server.com")}\""
+        )
     }
 
     buildTypes {
@@ -77,13 +103,21 @@ dependencies {
     // DataStore для локального хранения настроек
     implementation(libs.androidx.datastore.preferences)
 
+    // WebSocket & HTTP клиент
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    // JSON serialization
+    implementation(libs.kotlinx.serialization.json)  // Kotlinx Serialization для WebSocket
+    implementation("com.google.code.gson:gson:2.10.1")  // Gson для Firebase (может понадобиться)
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    
+
     // Debug
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)

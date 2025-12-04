@@ -4,12 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.imdoctor.flotilla.data.remote.websocket.WebSocketManager
 import com.imdoctor.flotilla.data.remote.websocket.models.*
+import com.imdoctor.flotilla.data.repository.MatchmakingDataHolder
 import com.imdoctor.flotilla.data.repository.UserRepository
 import com.imdoctor.flotilla.utils.Logger
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToJsonElement
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.decodeFromJsonElement
 
 private const val TAG = "MatchmakingViewModel"
 
@@ -30,6 +32,9 @@ class MatchmakingViewModel(
         ignoreUnknownKeys = true
         encodeDefaults = true
     }
+
+    // Кэш кораблей, отправленных на matchmaking
+    private var sentShips: List<ShipPlacement> = emptyList()
 
     /**
      * Начать поиск матча
@@ -89,6 +94,9 @@ class MatchmakingViewModel(
                 } else {
                     ships
                 }
+
+                // Сохраняем корабли для последующей передачи в GameScreen
+                sentShips = shipPlacements
 
                 val data = JoinQueueData(
                     nickname = nickname,
@@ -160,6 +168,15 @@ class MatchmakingViewModel(
                 try {
                     val data = json.decodeFromJsonElement<MatchFoundData>(event.data!!)
                     Logger.i(TAG, "Match found! Game ID: ${data.gameId}")
+
+                    // Сохраняем данные matchmaking для GameScreen
+                    MatchmakingDataHolder.saveMatchData(
+                        gameId = data.gameId,
+                        opponentNickname = data.opponentNickname,
+                        yourTurn = data.yourTurn,
+                        myShips = sentShips
+                    )
+
                     _uiState.value = MatchmakingUiState.MatchFound(
                         gameId = data.gameId,
                         opponentNickname = data.opponentNickname,

@@ -1,3 +1,6 @@
+import java.util.Properties
+import java.io.FileInputStream
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -23,7 +26,7 @@ android {
 
         // Читаем конфигурацию сервера из local.properties
         val localProperties = File(rootProject.projectDir, "local.properties")
-        val properties = java.util.Properties()
+        val properties = Properties()
 
         if (localProperties.exists()) {
             properties.load(localProperties.inputStream())

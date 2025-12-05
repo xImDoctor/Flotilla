@@ -60,11 +60,43 @@ class MatchmakingViewModel(
                 val profile = userRepository.getCurrentUserProfile()
                 val nickname = profile?.nickname ?: "Player"
 
-                // Подключиться к matchmaking WebSocket
-                webSocketManager.connectToMatchmaking(token)
-                    .collect { event ->
-                        handleMatchmakingEvent(event)
+                // Подготовить корабли
+                val shipPlacements = if (ships.isEmpty()) {
+                    createMockShips()
+                } else {
+                    ships
+                }
+                sentShips = shipPlacements
+
+                // Подключиться к matchmaking WebSocket с callback
+                webSocketManager.connectToMatchmaking(
+                    token = token,
+                    onConnected = {
+                        // ВАЖНО: Callback вызывается в OkHttp thread, нужен coroutine scope
+                        viewModelScope.launch {
+                            // Сразу после подключения отправляем join_queue
+                            Logger.i(TAG, ">>> [CALLBACK] WebSocket connected! Preparing join_queue...")
+                            try {
+                                val data = JoinQueueData(
+                                    nickname = nickname,
+                                    ships = shipPlacements
+                                )
+                                val dataJson = json.encodeToJsonElement(data)
+                                val event = WSEvent(
+                                    type = WSEventType.JOIN_QUEUE,
+                                    data = dataJson
+                                )
+                                Logger.i(TAG, ">>> [CALLBACK] Sending join_queue for $nickname...")
+                                webSocketManager.sendToMatchmaking(event)
+                                Logger.i(TAG, ">>> [CALLBACK] join_queue sent!")
+                            } catch (e: Exception) {
+                                Logger.e(TAG, ">>> [CALLBACK] Failed to send join_queue", e)
+                            }
+                        }
                     }
+                ).collect { event ->
+                    handleMatchmakingEvent(event)
+                }
 
             } catch (e: Exception) {
                 Logger.e(TAG, "Failed to start matchmaking", e)
@@ -148,7 +180,7 @@ class MatchmakingViewModel(
      * @param event WebSocket событие
      */
     private fun handleMatchmakingEvent(event: WSEvent) {
-        Logger.d(TAG, "Received event: ${event.type}")
+        Logger.i(TAG, ">>> Received event: ${event.type}, data: ${event.data}")
 
         when (event.type) {
             WSEventType.WAITING -> {

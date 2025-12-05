@@ -32,9 +32,10 @@ class WebSocketClient(
 
     private val client = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
-        .readTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(0, TimeUnit.SECONDS)  // Отключаем read timeout для long-polling
         .writeTimeout(30, TimeUnit.SECONDS)
-        .pingInterval(20, TimeUnit.SECONDS)  // Keep-alive
+        // Убрали pingInterval - сервер не отвечает на протокольные ping frames
+        // Keep-alive реализуется через JSON ping/pong события от сервера
         .build()
 
     private val json = Json {
@@ -48,7 +49,7 @@ class WebSocketClient(
      *
      * @return Flow с WebSocket событиями
      */
-    fun connect(): Flow<WSEvent> = callbackFlow {
+    fun connect(onConnected: (() -> Unit)? = null): Flow<WSEvent> = callbackFlow {
         val fullUrl = "$url?token=$token"
         Logger.d(TAG, "Connecting to: $url")
 
@@ -58,14 +59,22 @@ class WebSocketClient(
 
         webSocket = client.newWebSocket(request, object : WebSocketListener() {
             override fun onOpen(webSocket: WebSocket, response: Response) {
-                Logger.i(TAG, "WebSocket connected")
+                Logger.i(TAG, ">>> WebSocket CONNECTED (onOpen)")
+                // Вызвать callback после успешного подключения
+                Logger.i(TAG, ">>> Calling onConnected callback...")
+                onConnected?.invoke()
+                Logger.i(TAG, ">>> onConnected callback finished")
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
-                Logger.d(TAG, "Received: $text")
+                Logger.i(TAG, "<<< RAW MESSAGE: $text")
                 try {
                     val event = json.decodeFromString<WSEvent>(text)
-                    trySend(event).isSuccess
+                    Logger.i(TAG, "<<< PARSED EVENT: type=${event.type}")
+                    val result = trySend(event)
+                    if (!result.isSuccess) {
+                        Logger.e(TAG, "Failed to send event to flow: ${result.exceptionOrNull()}")
+                    }
                 } catch (e: Exception) {
                     Logger.e(TAG, "Failed to parse message: $text", e)
                 }
@@ -96,8 +105,13 @@ class WebSocketClient(
     fun send(event: WSEvent) {
         try {
             val jsonString = json.encodeToString(event)
-            Logger.d(TAG, "Sending: $jsonString")
-            webSocket?.send(jsonString)
+            Logger.i(TAG, ">>> SENDING: $jsonString")
+            val success = webSocket?.send(jsonString) ?: false
+            if (success) {
+                Logger.i(TAG, ">>> Message sent successfully")
+            } else {
+                Logger.e(TAG, ">>> Failed to send message (webSocket null or send failed)")
+            }
         } catch (e: Exception) {
             Logger.e(TAG, "Failed to send event", e)
         }

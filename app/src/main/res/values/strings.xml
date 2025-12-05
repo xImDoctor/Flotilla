@@ -39,6 +39,7 @@
 
     <!-- Find Opponent Screen -->
     <string name="find_opponent_title">Найти соперника</string>
+    <string name="find_opponent_connecting">Подключение…</string>
     <string name="find_opponent_searching">Ищем соперника…</string>
     <string name="find_opponent_cancel_search">Отменить поиск</string>
     <string name="find_opponent_ready_prompt">Готовы найти соперника?</string>

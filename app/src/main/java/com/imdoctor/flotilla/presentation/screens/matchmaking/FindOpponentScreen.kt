@@ -163,7 +163,7 @@ private fun ConnectingContent() {
     Spacer(modifier = Modifier.height(24.dp))
 
     Text(
-        text = "Подключение к серверу...",
+        text = stringResource(R.string.find_opponent_connecting),
         style = MaterialTheme.typography.titleMedium,
         textAlign = TextAlign.Center
     )
@@ -176,11 +176,6 @@ private fun WaitingContent(
     onCancel: () -> Unit,
     onJoinQueue: () -> Unit
 ) {
-    // При первом входе в Waiting, автоматически присоединяемся к очереди
-    LaunchedEffect(Unit) {
-        onJoinQueue()
-    }
-
     CircularProgressIndicator(
         modifier = Modifier.size(64.dp)
     )

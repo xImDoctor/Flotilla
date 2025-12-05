@@ -28,9 +28,10 @@ class WebSocketManager {
      * Подключиться к matchmaking WebSocket
      *
      * @param token Firebase ID token для аутентификации
+     * @param onConnected Callback вызывается после успешного подключения
      * @return Flow с WebSocket событиями
      */
-    fun connectToMatchmaking(token: String): Flow<WSEvent> {
+    fun connectToMatchmaking(token: String, onConnected: (() -> Unit)? = null): Flow<WSEvent> {
         Logger.i(TAG, "Connecting to matchmaking")
         _connectionState.value = ConnectionState.Connecting
 
@@ -41,7 +42,7 @@ class WebSocketManager {
         )
 
         _connectionState.value = ConnectionState.Connected
-        return matchmakingClient!!.connect()
+        return matchmakingClient!!.connect(onConnected = onConnected)
     }
 
     /**
@@ -49,9 +50,10 @@ class WebSocketManager {
      *
      * @param gameId ID игры
      * @param token Firebase ID token для аутентификации
+     * @param onConnected Callback вызывается после успешного подключения
      * @return Flow с WebSocket событиями
      */
-    fun connectToGame(gameId: String, token: String): Flow<WSEvent> {
+    fun connectToGame(gameId: String, token: String, onConnected: (() -> Unit)? = null): Flow<WSEvent> {
         Logger.i(TAG, "Connecting to game: $gameId")
         _connectionState.value = ConnectionState.Connecting
 
@@ -62,7 +64,7 @@ class WebSocketManager {
         )
 
         _connectionState.value = ConnectionState.Connected
-        return gameClient!!.connect()
+        return gameClient!!.connect(onConnected = onConnected)
     }
 
     /**

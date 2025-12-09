@@ -27,7 +27,8 @@ class ViewModelFactory : ViewModelProvider.Factory {
 
             modelClass.isAssignableFrom(StatisticsViewModel::class.java) -> {
                 StatisticsViewModel(
-                    userRepository = AppContainer.userRepository
+                    userRepository = AppContainer.userRepository,
+                    aiStatistics = AppContainer.aiStatisticsDataStore
                 ) as T
             }
 

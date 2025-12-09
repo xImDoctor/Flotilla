@@ -1,12 +1,15 @@
 package com.imdoctor.flotilla.di
 
 import android.content.Context
+import com.imdoctor.flotilla.audio.AudioManager
+import com.imdoctor.flotilla.data.local.preferences.AIStatisticsDataStore
 import com.imdoctor.flotilla.data.local.preferences.SettingsDataStore
 import com.imdoctor.flotilla.data.remote.firebase.FirebaseAuthManager
 import com.imdoctor.flotilla.data.remote.firebase.FirestoreManager
 import com.imdoctor.flotilla.data.remote.websocket.WebSocketManager
 import com.imdoctor.flotilla.data.repository.SettingsRepository
 import com.imdoctor.flotilla.data.repository.UserRepository
+import com.imdoctor.flotilla.utils.VibrationManager
 
 /**
  * Простой Dependency Injection контейнер
@@ -64,6 +67,36 @@ object AppContainer {
      */
     val webSocketManager: WebSocketManager by lazy {
         WebSocketManager()
+    }
+
+    /**
+     * Audio Manager для музыки и звуковых эффектов
+     */
+    val audioManager: AudioManager by lazy {
+        requireNotNull(applicationContext) {
+            "AppContainer not initialized. Call initialize() in Application.onCreate()"
+        }
+        AudioManager(applicationContext!!)
+    }
+
+    /**
+     * Vibration Manager для тактильной обратной связи
+     */
+    val vibrationManager: VibrationManager by lazy {
+        requireNotNull(applicationContext) {
+            "AppContainer not initialized. Call initialize() in Application.onCreate()"
+        }
+        VibrationManager(applicationContext!!)
+    }
+
+    /**
+     * AI Statistics DataStore для локальной статистики игр против AI
+     */
+    val aiStatisticsDataStore: AIStatisticsDataStore by lazy {
+        requireNotNull(applicationContext) {
+            "AppContainer not initialized. Call initialize() in Application.onCreate()"
+        }
+        AIStatisticsDataStore(applicationContext!!)
     }
 
 

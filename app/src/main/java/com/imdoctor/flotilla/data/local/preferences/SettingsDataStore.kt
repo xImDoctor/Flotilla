@@ -34,15 +34,17 @@ class SettingsDataStore(private val context: Context) {
         // Ключи для настроек
         private val NICKNAME_KEY = stringPreferencesKey("nickname")
         private val SHOW_COORDINATES_KEY = booleanPreferencesKey("show_coordinates")
-        private val SOUND_ENABLED_KEY = booleanPreferencesKey("sound_enabled")
+        private val MUSIC_ENABLED_KEY = booleanPreferencesKey("music_enabled")
+        private val SOUND_EFFECTS_ENABLED_KEY = booleanPreferencesKey("sound_effects_enabled")
         private val ANIMATIONS_ENABLED_KEY = booleanPreferencesKey("animations_enabled")
         private val VIBRATION_ENABLED_KEY = booleanPreferencesKey("vibration_enabled")
         private val SELECTED_SHIP_SKIN_KEY = stringPreferencesKey("selected_ship_skin")
-        
+
         // Дефолтные значения
         private const val DEFAULT_NICKNAME = "Player"
         private const val DEFAULT_SHOW_COORDINATES = true
-        private const val DEFAULT_SOUND_ENABLED = true
+        private const val DEFAULT_MUSIC_ENABLED = true
+        private const val DEFAULT_SOUND_EFFECTS_ENABLED = true
         private const val DEFAULT_ANIMATIONS_ENABLED = true
         private const val DEFAULT_VIBRATION_ENABLED = true
         private const val DEFAULT_SHIP_SKIN = "default"
@@ -69,11 +71,19 @@ class SettingsDataStore(private val context: Context) {
         }
     
     /**
-     * Flow с настройкой звука
+     * Flow с настройкой фоновой музыки
      */
-    val soundEnabledFlow: Flow<Boolean> = context.dataStore.data
+    val musicEnabledFlow: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
-            preferences[SOUND_ENABLED_KEY] ?: DEFAULT_SOUND_ENABLED
+            preferences[MUSIC_ENABLED_KEY] ?: DEFAULT_MUSIC_ENABLED
+        }
+
+    /**
+     * Flow с настройкой звуковых эффектов
+     */
+    val soundEffectsEnabledFlow: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[SOUND_EFFECTS_ENABLED_KEY] ?: DEFAULT_SOUND_EFFECTS_ENABLED
         }
     
     /**
@@ -127,13 +137,24 @@ class SettingsDataStore(private val context: Context) {
     }
     
     /**
-     * Сохранение настройки звука
-     * 
+     * Сохранение настройки фоновой музыки
+     *
+     * @param enabled Включена ли фоновая музыка
+     */
+    suspend fun setMusicEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[MUSIC_ENABLED_KEY] = enabled
+        }
+    }
+
+    /**
+     * Сохранение настройки звуковых эффектов
+     *
      * @param enabled Включены ли звуковые эффекты
      */
-    suspend fun setSoundEnabled(enabled: Boolean) {
+    suspend fun setSoundEffectsEnabled(enabled: Boolean) {
         context.dataStore.edit { preferences ->
-            preferences[SOUND_ENABLED_KEY] = enabled
+            preferences[SOUND_EFFECTS_ENABLED_KEY] = enabled
         }
     }
     
@@ -193,11 +214,12 @@ class SettingsDataStore(private val context: Context) {
      */
     suspend fun getCurrentSettings(): SettingsSnapshot {
         val preferences = context.dataStore.data.map { it }.first()
-        
+
         return SettingsSnapshot(
             nickname = preferences[NICKNAME_KEY] ?: DEFAULT_NICKNAME,
             showCoordinates = preferences[SHOW_COORDINATES_KEY] ?: DEFAULT_SHOW_COORDINATES,
-            soundEnabled = preferences[SOUND_ENABLED_KEY] ?: DEFAULT_SOUND_ENABLED,
+            musicEnabled = preferences[MUSIC_ENABLED_KEY] ?: DEFAULT_MUSIC_ENABLED,
+            soundEffectsEnabled = preferences[SOUND_EFFECTS_ENABLED_KEY] ?: DEFAULT_SOUND_EFFECTS_ENABLED,
             animationsEnabled = preferences[ANIMATIONS_ENABLED_KEY] ?: DEFAULT_ANIMATIONS_ENABLED,
             vibrationEnabled = preferences[VIBRATION_ENABLED_KEY] ?: DEFAULT_VIBRATION_ENABLED,
             selectedShipSkin = preferences[SELECTED_SHIP_SKIN_KEY] ?: DEFAULT_SHIP_SKIN
@@ -207,13 +229,14 @@ class SettingsDataStore(private val context: Context) {
 
 /**
  * Snapshot текущих настроек
- * 
+ *
  * Используется для одноразового чтения всех настроек
  */
 data class SettingsSnapshot(
     val nickname: String,
     val showCoordinates: Boolean,
-    val soundEnabled: Boolean,
+    val musicEnabled: Boolean,
+    val soundEffectsEnabled: Boolean,
     val animationsEnabled: Boolean,
     val vibrationEnabled: Boolean,
     val selectedShipSkin: String

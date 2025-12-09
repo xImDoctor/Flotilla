@@ -2,11 +2,14 @@ package com.imdoctor.flotilla.presentation.screens.game
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.imdoctor.flotilla.audio.AudioManager
 import com.imdoctor.flotilla.data.remote.websocket.WebSocketManager
 import com.imdoctor.flotilla.data.remote.websocket.models.*
 import com.imdoctor.flotilla.data.repository.UserRepository
+import com.imdoctor.flotilla.di.AppContainer
 import com.imdoctor.flotilla.presentation.screens.game.models.*
 import com.imdoctor.flotilla.utils.Logger
+import com.imdoctor.flotilla.utils.VibrationManager
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -26,7 +29,9 @@ class OnlineGameViewModel(
     private val yourTurn: Boolean,
     private val myShips: List<ShipPlacement>,
     private val webSocketManager: WebSocketManager,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val audioManager: AudioManager = AppContainer.audioManager,
+    private val vibrationManager: VibrationManager = AppContainer.vibrationManager
 ) : ViewModel() {
 
     private val _gameState = MutableStateFlow<GameState?>(null)
@@ -232,6 +237,21 @@ class OnlineGameViewModel(
 
             Logger.i(TAG, "Move result: (${data.x}, ${data.y}) = ${data.result}")
 
+            // Воспроизвести звук и вибрацию в зависимости от результата
+            when (data.result) {
+                MoveResult.HIT, MoveResult.SUNK -> {
+                    audioManager.playHit()
+                    vibrationManager.vibrateHit()
+                }
+                MoveResult.MISS -> {
+                    audioManager.playMiss()
+                }
+                MoveResult.WIN -> {
+                    audioManager.playVictory()
+                }
+                else -> { /* no sound for other results */ }
+            }
+
             // Обновить поле противника
             val newOpponentBoard = when (data.result) {
                 MoveResult.MISS -> {
@@ -286,6 +306,17 @@ class OnlineGameViewModel(
             val currentState = _gameState.value ?: return
 
             Logger.i(TAG, "Opponent move: (${data.x}, ${data.y}) = ${data.result}")
+
+            // Воспроизвести звук и вибрацию в зависимости от результата
+            when (data.result) {
+                "hit" -> {
+                    audioManager.playHit()
+                    vibrationManager.vibrateHit()
+                }
+                "miss" -> {
+                    audioManager.playMiss()
+                }
+            }
 
             // Обновить моё поле
             val newMyBoard = when (data.result) {
@@ -342,6 +373,13 @@ class OnlineGameViewModel(
 
             // Определить победителя
             val isWinner = data.winnerId == currentUserId
+
+            // Воспроизвести звук победы или поражения
+            if (isWinner) {
+                audioManager.playVictory()
+            } else {
+                audioManager.playDefeat()
+            }
 
             _gameState.value = currentState.copy(
                 gameOver = true,

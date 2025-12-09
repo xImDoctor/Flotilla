@@ -2,33 +2,47 @@ package com.imdoctor.flotilla.presentation.screens.stats
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.imdoctor.flotilla.data.local.preferences.AIStatisticsDataStore
 import com.imdoctor.flotilla.data.remote.firebase.models.GameHistory
 import com.imdoctor.flotilla.data.remote.firebase.models.UserProfile
 import com.imdoctor.flotilla.data.repository.UserRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 /**
  * ViewModel для экрана статистики
- * 
+ *
  * Управляет загрузкой и отображением:
  * - Статистики пользователя (побед, поражений, точности)
  * - Истории игр
+ * - AI статистики (локальной)
  */
 class StatisticsViewModel(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val aiStatistics: AIStatisticsDataStore
 ) : ViewModel() {
-    
+
 
     // STATE для UI
-    
+
     private val _uiState = MutableStateFlow<StatisticsUiState>(StatisticsUiState.Loading)
     val uiState: StateFlow<StatisticsUiState> = _uiState.asStateFlow()
-    
+
     private val _gameHistory = MutableStateFlow<List<GameHistory>>(emptyList())
     val gameHistory: StateFlow<List<GameHistory>> = _gameHistory.asStateFlow()
+
+    // AI статистика (локальная)
+    val easyWins: StateFlow<Int> = aiStatistics.easyWinsFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val easyLosses: StateFlow<Int> = aiStatistics.easyLossesFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val hardWins: StateFlow<Int> = aiStatistics.hardWinsFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val hardLosses: StateFlow<Int> = aiStatistics.hardLossesFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
     
     init {
         loadStatistics()

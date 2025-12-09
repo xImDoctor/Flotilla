@@ -30,7 +30,8 @@ fun SettingsScreen(
     // Получаем значения из ViewModel через collectAsStateWithLifecycle
     val nickname by viewModel.nickname.collectAsStateWithLifecycle()
     val showCoordinates by viewModel.showCoordinates.collectAsStateWithLifecycle()
-    val soundEnabled by viewModel.soundEnabled.collectAsStateWithLifecycle()
+    val musicEnabled by viewModel.musicEnabled.collectAsStateWithLifecycle()
+    val soundEffectsEnabled by viewModel.soundEffectsEnabled.collectAsStateWithLifecycle()
     val animationsEnabled by viewModel.animationsEnabled.collectAsStateWithLifecycle()
     val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
     val nicknameUpdateResult by viewModel.nicknameUpdateResult.collectAsStateWithLifecycle()
@@ -155,11 +156,17 @@ fun SettingsScreen(
                 text = stringResource(R.string.settings_audio_effects_title),
                 style = MaterialTheme.typography.titleMedium
             )
-            
+
+            SettingsRow(
+                label = stringResource(R.string.settings_background_music),
+                checked = musicEnabled,
+                onCheckedChange = { viewModel.toggleMusic(it) }
+            )
+
             SettingsRow(
                 label = stringResource(R.string.settings_sound_effects),
-                checked = soundEnabled,
-                onCheckedChange = { viewModel.toggleSound(it) }
+                checked = soundEffectsEnabled,
+                onCheckedChange = { viewModel.toggleSoundEffects(it) }
             )
             
             SettingsRow(

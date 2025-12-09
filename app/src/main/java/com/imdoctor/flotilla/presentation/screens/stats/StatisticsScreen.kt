@@ -31,6 +31,12 @@ fun StatisticsScreen(
     viewModel: StatisticsViewModel = viewModel(factory = ViewModelFactory())
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // AI статистика
+    val easyWins by viewModel.easyWins.collectAsStateWithLifecycle()
+    val easyLosses by viewModel.easyLosses.collectAsStateWithLifecycle()
+    val hardWins by viewModel.hardWins.collectAsStateWithLifecycle()
+    val hardLosses by viewModel.hardLosses.collectAsStateWithLifecycle()
     
     Scaffold(
         topBar = {
@@ -52,6 +58,10 @@ fun StatisticsScreen(
             is StatisticsUiState.Success -> {
                 StatisticsContent(
                     profile = state.profile,
+                    easyWins = easyWins,
+                    easyLosses = easyLosses,
+                    hardWins = hardWins,
+                    hardLosses = hardLosses,
                     modifier = Modifier.padding(padding)
                 )
             }
@@ -90,6 +100,10 @@ private fun LoadingState(modifier: Modifier = Modifier) {
 @Composable
 private fun StatisticsContent(
     profile: com.imdoctor.flotilla.data.remote.firebase.models.UserProfile,
+    easyWins: Int,
+    easyLosses: Int,
+    hardWins: Int,
+    hardLosses: Int,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -99,12 +113,18 @@ private fun StatisticsContent(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        // Онлайн статистика
+        Text(
+            text = "Онлайн игры",
+            style = MaterialTheme.typography.titleLarge
+        )
+
         // Всего игр
         StatCard(
             label = stringResource(R.string.statistics_total_games),
             value = profile.gamesPlayed.toString()
         )
-        
+
         // Побед и Поражений в одном ряду
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -115,34 +135,34 @@ private fun StatisticsContent(
                 value = profile.wins.toString(),
                 modifier = Modifier.weight(1f)
             )
-            
+
             StatCard(
                 label = stringResource(R.string.statistics_losses),
                 value = profile.losses.toString(),
                 modifier = Modifier.weight(1f)
             )
         }
-        
+
         // Процент побед
         StatCard(
             label = stringResource(R.string.statistics_win_rate),
             value = "${profile.winRate.roundToInt()}%"
         )
-        
+
         // Точность попаданий
         StatCard(
             label = stringResource(R.string.statistics_accuracy),
             value = "${profile.accuracy.roundToInt()}%"
         )
-        
+
         // Дополнительная статистика
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         Text(
             text = "Детальная статистика",
             style = MaterialTheme.typography.titleMedium
         )
-        
+
         Card(
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -162,6 +182,158 @@ private fun StatisticsContent(
                     label = "Никнейм:",
                     value = profile.nickname
                 )
+            }
+        }
+
+        // Разделитель
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 16.dp),
+            thickness = 2.dp
+        )
+
+        // AI статистика
+        Text(
+            text = "Игры против ИИ",
+            style = MaterialTheme.typography.titleLarge
+        )
+
+        // Лёгкий режим
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "Лёгкий уровень",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Побед",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = easyWins.toString(),
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                    }
+
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Поражений",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = easyLosses.toString(),
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                    }
+
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Винрейт",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        val easyWinRate = if (easyWins + easyLosses > 0) {
+                            (easyWins.toFloat() / (easyWins + easyLosses) * 100).roundToInt()
+                        } else {
+                            0
+                        }
+                        Text(
+                            text = "$easyWinRate%",
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                    }
+                }
+            }
+        }
+
+        // Сложный режим
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = "Сложный уровень",
+                    style = MaterialTheme.typography.titleMedium
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Побед",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = hardWins.toString(),
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                    }
+
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Поражений",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = hardLosses.toString(),
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                    }
+
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Винрейт",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        val hardWinRate = if (hardWins + hardLosses > 0) {
+                            (hardWins.toFloat() / (hardWins + hardLosses) * 100).roundToInt()
+                        } else {
+                            0
+                        }
+                        Text(
+                            text = "$hardWinRate%",
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                    }
+                }
             }
         }
     }

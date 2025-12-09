@@ -99,7 +99,8 @@ match /users/{userId} {
         && isValidString(request.resource.data.selected_ship_skin, 50)
         && request.resource.data.user_id == userId
         && request.resource.data.show_coordinates is bool
-        && request.resource.data.sound_enabled is bool
+        && request.resource.data.music_enabled is bool
+        && request.resource.data.sound_effects_enabled is bool
         && request.resource.data.animations_enabled is bool
         && request.resource.data.vibration_enabled is bool;
       

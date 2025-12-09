@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import com.imdoctor.flotilla.di.AppContainer
 import com.imdoctor.flotilla.presentation.StartupViewModel
 import com.imdoctor.flotilla.presentation.ViewModelFactory
 import com.imdoctor.flotilla.presentation.navigation.FlotillaNavGraph
@@ -54,5 +55,17 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        // Приостанавливаем фоновую музыку когда приложение сворачивается
+        AppContainer.audioManager.onAppPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Возобновляем фоновую музыку когда приложение возвращается
+        AppContainer.audioManager.onAppResume()
     }
 }

@@ -62,6 +62,7 @@
     <string name="settings_grid_title">Настройки сетки</string>
     <string name="settings_show_coordinates">Показывать координаты</string>
     <string name="settings_audio_effects_title">Аудио и эффекты</string>
+    <string name="settings_background_music">Фоновая музыка</string>
     <string name="settings_sound_effects">Звуковые эффекты</string>
     <string name="settings_animations">Анимация</string>
     <string name="settings_vibration">Вибрация</string>

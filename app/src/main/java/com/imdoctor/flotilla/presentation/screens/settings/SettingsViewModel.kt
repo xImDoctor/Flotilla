@@ -65,9 +65,19 @@ class SettingsViewModel(
         )
     
     /**
+     * Фоновая музыка включена
+     */
+    val musicEnabled: StateFlow<Boolean> = settingsRepository.musicEnabledFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = true
+        )
+
+    /**
      * Звуковые эффекты включены
      */
-    val soundEnabled: StateFlow<Boolean> = settingsRepository.soundEnabledFlow
+    val soundEffectsEnabled: StateFlow<Boolean> = settingsRepository.soundEffectsEnabledFlow
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -150,13 +160,24 @@ class SettingsViewModel(
     }
     
     /**
+     * Переключение фоновой музыки
+     *
+     * @param enabled Включена ли музыка
+     */
+    fun toggleMusic(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setMusicEnabled(enabled)
+        }
+    }
+
+    /**
      * Переключение звуковых эффектов
-     * 
+     *
      * @param enabled Включены ли звуки
      */
-    fun toggleSound(enabled: Boolean) {
+    fun toggleSoundEffects(enabled: Boolean) {
         viewModelScope.launch {
-            settingsRepository.setSoundEnabled(enabled)
+            settingsRepository.setSoundEffectsEnabled(enabled)
         }
     }
     

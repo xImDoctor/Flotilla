@@ -8,6 +8,7 @@ object FlotillaColors {
     // основной цвет - морская волна
     val Primary = Color(0xFF1E88E5)
     val PrimaryVariant = Color(0xFF1565C0)
+    val PrimaryDark = Color(0xFF0D47A1)
     val OnPrimary = Color(0xFFFFFFFF)
 
     // акцентный (доп) цвет - коралл
@@ -18,8 +19,11 @@ object FlotillaColors {
     // фон
     val Background = Color(0xFF121212)
     val Surface = Color(0xFF1E1E1E)
+    val SurfaceVariant = Color(0xFF2C2C2C)
     val OnBackground = Color(0xFFE0E0E0)
     val OnSurface = Color(0xFFE0E0E0)
+    val OnSurfaceVariant = Color(0xFF9E9E9E)
+    val Outline = Color(0xFF424242)
 
     // специфичные цвета под игровую карту
     val WaterColor = Color(0xFF1565C0)       // вода

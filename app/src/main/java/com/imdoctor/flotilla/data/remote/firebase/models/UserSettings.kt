@@ -30,9 +30,13 @@ data class UserSettings(
     var showCoordinates: Boolean = true,
 
     // Аудио и эффекты
-    @get:PropertyName("sound_enabled")
-    @set:PropertyName("sound_enabled")
-    var soundEnabled: Boolean = true,
+    @get:PropertyName("music_enabled")
+    @set:PropertyName("music_enabled")
+    var musicEnabled: Boolean = true,
+
+    @get:PropertyName("sound_effects_enabled")
+    @set:PropertyName("sound_effects_enabled")
+    var soundEffectsEnabled: Boolean = true,
 
     @get:PropertyName("animations_enabled")
     @set:PropertyName("animations_enabled")

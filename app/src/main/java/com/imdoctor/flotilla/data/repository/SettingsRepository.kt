@@ -46,7 +46,8 @@ class SettingsRepository(
     // FLOWS для чтения настроек
     val nicknameFlow: Flow<String> = localDataStore.nicknameFlow
     val showCoordinatesFlow: Flow<Boolean> = localDataStore.showCoordinatesFlow
-    val soundEnabledFlow: Flow<Boolean> = localDataStore.soundEnabledFlow
+    val musicEnabledFlow: Flow<Boolean> = localDataStore.musicEnabledFlow
+    val soundEffectsEnabledFlow: Flow<Boolean> = localDataStore.soundEffectsEnabledFlow
     val animationsEnabledFlow: Flow<Boolean> = localDataStore.animationsEnabledFlow
     val vibrationEnabledFlow: Flow<Boolean> = localDataStore.vibrationEnabledFlow
     val selectedShipSkinFlow: Flow<String> = localDataStore.selectedShipSkinFlow
@@ -169,16 +170,33 @@ class SettingsRepository(
     }
     
     /**
-     * Сохранение настройки звука
+     * Сохранение настройки фоновой музыки
      */
-    suspend fun setSoundEnabled(enabled: Boolean): Result<Unit> {
+    suspend fun setMusicEnabled(enabled: Boolean): Result<Unit> {
         return try {
-            localDataStore.setSoundEnabled(enabled)
-            
+            localDataStore.setMusicEnabled(enabled)
+
             authManager.currentUserId?.let { userId ->
                 syncSettingsToFirebase(userId)
             }
-            
+
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Сохранение настройки звуковых эффектов
+     */
+    suspend fun setSoundEffectsEnabled(enabled: Boolean): Result<Unit> {
+        return try {
+            localDataStore.setSoundEffectsEnabled(enabled)
+
+            authManager.currentUserId?.let { userId ->
+                syncSettingsToFirebase(userId)
+            }
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -247,17 +265,18 @@ class SettingsRepository(
     private suspend fun syncSettingsToFirebase(userId: String): Result<Unit> {
         return try {
             val snapshot = localDataStore.getCurrentSettings()
-            
+
             val userSettings = UserSettings(
                 userId = userId,
                 nickname = snapshot.nickname,
                 showCoordinates = snapshot.showCoordinates,
-                soundEnabled = snapshot.soundEnabled,
+                musicEnabled = snapshot.musicEnabled,
+                soundEffectsEnabled = snapshot.soundEffectsEnabled,
                 animationsEnabled = snapshot.animationsEnabled,
                 vibrationEnabled = snapshot.vibrationEnabled,
                 selectedShipSkin = snapshot.selectedShipSkin
             )
-            
+
             firestoreManager.saveUserSettings(userSettings)
         } catch (e: Exception) {
             Result.failure(e)
@@ -280,7 +299,8 @@ class SettingsRepository(
                 // Загружаем настройки в DataStore
                 localDataStore.setNickname(settings.nickname)
                 localDataStore.setShowCoordinates(settings.showCoordinates)
-                localDataStore.setSoundEnabled(settings.soundEnabled)
+                localDataStore.setMusicEnabled(settings.musicEnabled)
+                localDataStore.setSoundEffectsEnabled(settings.soundEffectsEnabled)
                 localDataStore.setAnimationsEnabled(settings.animationsEnabled)
                 localDataStore.setVibrationEnabled(settings.vibrationEnabled)
                 localDataStore.setSelectedShipSkin(settings.selectedShipSkin)

@@ -88,9 +88,9 @@ fun FlotillaNavGraph(navController: NavHostController, startDestination: String 
                     gameMode = gameMode!!,
                     onSetupComplete = { gameId ->
 
-                        // Переход к игре с валидированным ID
+                        // Переход к игре с валидированным ID и режимом игры
                         if (NavigationValidator.isValidGameId(gameId)) {
-                            navController.navigate(Screen.Game.createRoute(gameId)) {
+                            navController.navigate(Screen.Game.createRoute(gameId, gameMode)) {
 
                                 // Очистка back stack для предотвращения возврата к setup
                                 popUpTo(Screen.MainMenu.route)
@@ -107,18 +107,24 @@ fun FlotillaNavGraph(navController: NavHostController, startDestination: String 
 
         // игра (матч)
         composable(
-            route = "${Screen.Game.route}/{${Screen.Game.ARG_GAME_ID}}",
+            route = "${Screen.Game.route}/{${Screen.Game.ARG_GAME_ID}}/{${Screen.Game.ARG_GAME_MODE}}",
             arguments = listOf(
                 navArgument(Screen.Game.ARG_GAME_ID) {
                     type = NavType.StringType
+                },
+                navArgument(Screen.Game.ARG_GAME_MODE) {
+                    type = NavType.StringType
+                    defaultValue = "online"
                 }
             )
         ) { backStackEntry ->
             val gameId = backStackEntry.arguments?.getString(Screen.Game.ARG_GAME_ID)
+            val gameMode = backStackEntry.arguments?.getString(Screen.Game.ARG_GAME_MODE) ?: "online"
 
-            if (NavigationValidator.isValidGameId(gameId)) {
+            if (NavigationValidator.isValidGameId(gameId) && NavigationValidator.isValidGameMode(gameMode)) {
                 GameScreen(
                     gameId = gameId!!,
+                    gameMode = gameMode,
                     onGameEnd = {
                         // После окончания игры - в статистику
                         navController.navigate(Screen.Statistics.route) {

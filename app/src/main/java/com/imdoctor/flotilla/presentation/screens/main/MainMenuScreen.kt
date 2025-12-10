@@ -39,13 +39,43 @@ fun MainMenuScreen(onNewGame: (String) -> Unit, onFindOpponent: () -> Unit, onSt
 
         Spacer(modifier = Modifier.height(48.dp))
 
-        // Кнопки меню
-        MenuButton(
-            text = stringResource(R.string.main_menu_play_vs_ai),
-            onClick = { onNewGame("vs_ai") }
+        // Секция AI игр
+        Text(
+            text = "Игра против ИИ",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Кнопки AI уровней сложности
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            MenuButton(
+                text = "Лёгкий",
+                onClick = { onNewGame("ai_easy") },
+                modifier = Modifier.weight(1f)
+            )
+
+            MenuButton(
+                text = "Сложный",
+                onClick = { onNewGame("ai_hard") },
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Секция онлайн игр
+        Text(
+            text = "Онлайн режим",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
 
         MenuButton(
             text = stringResource(R.string.main_menu_find_opponent),

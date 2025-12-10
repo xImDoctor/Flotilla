@@ -184,9 +184,22 @@ fun ShipSetupScreen(
                     onClick = {
                         val ships = viewModel.validateAndProceed()
                         if (ships != null) {
-                            // TODO: Отправить корабли на сервер и получить game ID
-                            val fakeGameId = "game_${System.currentTimeMillis()}"
-                            onSetupComplete(fakeGameId)
+                            val gameId = "game_${System.currentTimeMillis()}"
+
+                            // Для AI режимов сохраняем данные в AIGameDataHolder
+                            if (gameMode.startsWith("ai_")) {
+                                com.imdoctor.flotilla.data.repository.AIGameDataHolder.saveGameData(
+                                    gameId,
+                                    com.imdoctor.flotilla.data.repository.AIGameDataHolder.AIGameData(
+                                        gameId = gameId,
+                                        playerShips = ships,
+                                        difficulty = gameMode
+                                    )
+                                )
+                            }
+
+                            // Переход к игре
+                            onSetupComplete(gameId)
                         }
                     },
                     enabled = uiState.isValid,

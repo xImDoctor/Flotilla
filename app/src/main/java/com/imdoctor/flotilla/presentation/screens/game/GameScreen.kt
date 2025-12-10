@@ -9,22 +9,55 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.imdoctor.flotilla.R
+import com.imdoctor.flotilla.data.repository.AIGameDataHolder
 import com.imdoctor.flotilla.data.repository.MatchmakingDataHolder
 import com.imdoctor.flotilla.di.AppContainer
+import com.imdoctor.flotilla.presentation.screens.game.ai.AIDifficulty
+import com.imdoctor.flotilla.presentation.screens.game.ai.AIGameViewModel
+import com.imdoctor.flotilla.presentation.screens.game.ai.AIGameViewModelFactory
 import com.imdoctor.flotilla.utils.security.SecureScreen
 
 /**
- * Экран онлайн игры
+ * Универсальный экран игры (онлайн и AI)
  *
  * @param gameId Идентификатор игры
+ * @param gameMode Режим игры ("online", "ai_easy", "ai_hard")
  * @param onGameEnd Callback при завершении игры
  * @param onExitGame Callback при выходе из игры
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameScreen(
+    gameId: String,
+    gameMode: String,
+    onGameEnd: () -> Unit,
+    onExitGame: () -> Unit
+) {
+    when {
+        gameMode == "online" -> {
+            OnlineGameScreen(gameId, onGameEnd, onExitGame)
+        }
+        gameMode.startsWith("ai_") -> {
+            AIGameScreen(gameId, gameMode, onGameEnd, onExitGame)
+        }
+        else -> {
+            ErrorScreen(
+                message = "Неизвестный режим игры: $gameMode",
+                onBack = onExitGame
+            )
+        }
+    }
+}
+
+/**
+ * Экран онлайн игры
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun OnlineGameScreen(
     gameId: String,
     onGameEnd: () -> Unit,
     onExitGame: () -> Unit
@@ -54,8 +87,8 @@ fun GameScreen(
         key = gameId
     )
 
-    val gameState by viewModel.gameState.collectAsState()
-    val uiState by viewModel.uiState.collectAsState()
+    val gameState by viewModel.gameState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     // Обработка завершения игры
     var showVictoryDialog by remember { mutableStateOf(false) }
@@ -98,6 +131,120 @@ fun GameScreen(
         )
     }
 
+    OnlineGameScaffold(
+        gameState = gameState,
+        uiState = uiState,
+        onCellClick = { x, y -> viewModel.makeMove(x, y) },
+        onExitGame = onExitGame
+    )
+}
+
+/**
+ * Экран AI игры
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AIGameScreen(
+    gameId: String,
+    gameMode: String,
+    onGameEnd: () -> Unit,
+    onExitGame: () -> Unit
+) {
+    // Получить данные AI игры
+    val aiGameData = AIGameDataHolder.getGameData(gameId)
+
+    if (aiGameData == null) {
+        ErrorScreen(
+            message = "Не удалось загрузить данные AI игры",
+            onBack = onExitGame
+        )
+        return
+    }
+
+    // Определить сложность
+    val difficulty = when (gameMode) {
+        "ai_easy" -> AIDifficulty.EASY
+        "ai_hard" -> AIDifficulty.HARD
+        else -> AIDifficulty.EASY
+    }
+
+    // Создать ViewModel для AI игры
+    val viewModel: AIGameViewModel = viewModel(
+        factory = AIGameViewModelFactory(
+            difficulty = difficulty,
+            playerShips = aiGameData.playerShips
+        ),
+        key = gameId
+    )
+
+    val gameState by viewModel.gameState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // Обработка завершения игры
+    var showVictoryDialog by remember { mutableStateOf(false) }
+    var showDefeatDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uiState) {
+        when (val state = uiState) {
+            is AIGameViewModel.AIGameUiState.Victory -> {
+                showVictoryDialog = true
+            }
+            is AIGameViewModel.AIGameUiState.Defeat -> {
+                showDefeatDialog = true
+            }
+            else -> {}
+        }
+    }
+
+    // Диалоги победы/поражения
+    if (showVictoryDialog && uiState is AIGameViewModel.AIGameUiState.Victory) {
+        val victoryState = uiState as AIGameViewModel.AIGameUiState.Victory
+        VictoryDialog(
+            totalMoves = victoryState.totalMoves,
+            durationSeconds = victoryState.durationSeconds,
+            onDismiss = {
+                showVictoryDialog = false
+                AIGameDataHolder.clearGameData(gameId)
+                onGameEnd()
+            }
+        )
+    }
+
+    if (showDefeatDialog && uiState is AIGameViewModel.AIGameUiState.Defeat) {
+        val defeatState = uiState as AIGameViewModel.AIGameUiState.Defeat
+        DefeatDialog(
+            totalMoves = defeatState.totalMoves,
+            durationSeconds = defeatState.durationSeconds,
+            onDismiss = {
+                showDefeatDialog = false
+                AIGameDataHolder.clearGameData(gameId)
+                onGameEnd()
+            }
+        )
+    }
+
+    AIGameScaffold(
+        gameState = gameState,
+        uiState = uiState,
+        onCellClick = { x, y -> viewModel.makeMove(x, y) },
+        onExitGame = {
+            AIGameDataHolder.clearGameData(gameId)
+            onExitGame()
+        }
+    )
+}
+
+/**
+ * Scaffold для онлайн игры
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun OnlineGameScaffold(
+    gameState: com.imdoctor.flotilla.presentation.screens.game.models.GameState?,
+    uiState: OnlineGameViewModel.GameUiState,
+    onCellClick: (Int, Int) -> Unit,
+    onExitGame: () -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(

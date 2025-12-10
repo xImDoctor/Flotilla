@@ -19,15 +19,17 @@ sealed class Screen(val route: String) {
     // постановка кораблей
     data object ShipSetup : Screen("ship_setup") {
 
-        // Параметр: режим игры (vs_ai, vs_player, local)
+        // Параметр: режим игры (online, ai_easy, ai_hard)
         fun createRoute(gameMode: String): String = "$route/$gameMode"
         const val ARG_GAME_MODE = "game_mode"
     }
 
     // игра ("катка")
     data object Game : Screen("game") {
-        fun createRoute(gameId: String): String = "$route/$gameId"
+        // gameMode добавлен для различения online и AI режимов
+        fun createRoute(gameId: String, gameMode: String = "online"): String = "$route/$gameId/$gameMode"
         const val ARG_GAME_ID = "game_id"
+        const val ARG_GAME_MODE = "game_mode"
     }
 
     // статистика
@@ -42,8 +44,8 @@ sealed class Screen(val route: String) {
  */
 object NavigationValidator {
 
-    private val GAME_MODE_REGEX = Regex("^(vs_ai|vs_player|local)$")
-    private val GAME_ID_REGEX = Regex("^[a-zA-Z0-9_-]{8,32}$")
+    private val GAME_MODE_REGEX = Regex("^(online|ai_easy|ai_hard)$")
+    private val GAME_ID_REGEX = Regex("^[a-zA-Z0-9_-]{3,32}$")
 
     fun isValidGameMode(mode: String?): Boolean = mode?.matches(GAME_MODE_REGEX) == true
 

@@ -26,6 +26,7 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -493,26 +494,27 @@ private fun GridCell(
 @Composable
 private fun PlacedShipVisual(
     ship: ShipPlacementValidator.PlacedShip,
-    cellSize: dp,
+    cellSize: Dp,
     onTap: () -> Unit,
     onLongPress: () -> Unit
 ) {
     val width = when (ship.orientation) {
-        ShipPlacementValidator.Orientation.HORIZONTAL -> cellSize * ship.length
+        ShipPlacementValidator.Orientation.HORIZONTAL -> cellSize.times(ship.length)
         ShipPlacementValidator.Orientation.VERTICAL -> cellSize
     }
 
     val height = when (ship.orientation) {
         ShipPlacementValidator.Orientation.HORIZONTAL -> cellSize
-        ShipPlacementValidator.Orientation.VERTICAL -> cellSize * ship.length
+        ShipPlacementValidator.Orientation.VERTICAL -> cellSize.times(ship.length)
     }
 
     Box(
         modifier = Modifier
             .offset {
+                val cellSizePx = cellSize.toPx()
                 IntOffset(
-                    x = (ship.x * cellSize.toPx()).roundToInt(),
-                    y = (ship.y * cellSize.toPx()).roundToInt()
+                    x = (ship.x * cellSizePx).roundToInt(),
+                    y = (ship.y * cellSizePx).roundToInt()
                 )
             }
             .size(width = width, height = height)
@@ -555,8 +557,8 @@ private fun DraggedShipPreview(
         modifier = modifier
             .offset {
                 IntOffset(
-                    x = offset.x.roundToInt() - (width.toPx() / 2).roundToInt(),
-                    y = offset.y.roundToInt() - (height.toPx() / 2).roundToInt()
+                    x = offset.x.roundToInt() - with(density) { (width.toPx() / 2).roundToInt() },
+                    y = offset.y.roundToInt() - with(density) { (height.toPx() / 2).roundToInt() }
                 )
             }
             .size(width = width, height = height)
@@ -565,5 +567,3 @@ private fun DraggedShipPreview(
             .border(2.dp, FlotillaColors.PrimaryDark, RoundedCornerShape(4.dp))
     )
 }
-
-private fun dp.toPx(): Float = value * 3f  // Approximate conversion for calculations

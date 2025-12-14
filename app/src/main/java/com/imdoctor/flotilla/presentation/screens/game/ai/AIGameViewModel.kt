@@ -293,7 +293,7 @@ class AIGameViewModel(
                     if (isSunk) {
                         Logger.i(TAG, "Player ship sunk by AI: ${ship.id}")
 
-                        updatedShip.positions.forEach { (sx, sy) ->
+                        updatedShip?.positions?.forEach { (sx, sy) ->
                             updatedPlayerBoard = updatedPlayerBoard.updateCell(sx, sy, CellState.SUNK)
                         }
 

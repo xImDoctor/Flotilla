@@ -134,7 +134,7 @@ private fun OnlineGameScreen(
     OnlineGameScaffold(
         gameState = gameState,
         uiState = uiState,
-        onCellClick = { x, y -> viewModel.makeMove(x, y) },
+        onCellClick = viewModel::makeMove,
         onExitGame = onExitGame
     )
 }
@@ -226,7 +226,7 @@ private fun AIGameScreen(
     AIGameScaffold(
         gameState = gameState,
         uiState = uiState,
-        onCellClick = { x, y -> viewModel.makeMove(x, y) },
+        onCellClick = viewModel::makeMove,
         onExitGame = {
             AIGameDataHolder.clearGameData(gameId)
             onExitGame()
@@ -277,7 +277,7 @@ private fun OnlineGameScaffold(
                     GameContent(
                         gameState = state,
                         uiState = uiState,
-                        onCellClick = { x, y -> viewModel.makeMove(x, y) },
+                        onCellClick = onCellClick,
                         modifier = Modifier.padding(padding)
                     )
                 }

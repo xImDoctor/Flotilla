@@ -257,88 +257,95 @@ class AIGameViewModel(
     }
 
     /**
-     * Выполнить ход AI
+     * Выполнить ход AI (и продолжать ходить при попаданиях)
      */
     private suspend fun makeAIMove() {
-        val currentState = _gameState.value ?: return
+        var shouldContinue = true
 
-        try {
-            // AI выбирает цель
-            val (x, y) = aiOpponent.getNextMove(currentState.myBoard)
-            Logger.i(TAG, "AI move: ($x, $y)")
+        while (shouldContinue) {
+            // КРИТИЧНО: Читаем свежий state на каждой итерации
+            val currentState = _gameState.value ?: return
 
-            delay(400)  // Задержка для реалистичности
-            totalMoves++
+            if (!currentState.isMyTurn && !currentState.gameOver) {
+                try {
+                    // AI выбирает цель
+                    val (x, y) = aiOpponent.getNextMove(currentState.myBoard)
+                    Logger.i(TAG, "AI move: ($x, $y)")
 
-            // Проверить результат
-            val cell = currentState.myBoard.getCell(x, y)
-            val isHit = cell?.state == CellState.SHIP
+                    delay(400)
+                    totalMoves++
 
-            if (isHit) {
-                // AI попал!
-                audioManager.playHit()
-                vibrationManager.vibrateHit()
+                    // Проверить результат
+                    val cell = currentState.myBoard.getCell(x, y)
+                    val isHit = cell?.state == CellState.SHIP
 
-                var updatedPlayerBoard = currentState.myBoard.updateCell(x, y, CellState.HIT)
-                val ship = updatedPlayerBoard.getShipAt(x, y)
+                    if (isHit) {
+                        // AI попал!
+                        audioManager.playHit()
+                        vibrationManager.vibrateHit()
 
-                var isSunk = false
-                if (ship != null) {
-                    updatedPlayerBoard = updatedPlayerBoard.updateShip(ship.id, Pair(x, y))
+                        var updatedPlayerBoard = currentState.myBoard.updateCell(x, y, CellState.HIT)
+                        val ship = updatedPlayerBoard.getShipAt(x, y)
 
-                    // Проверить, потоплен ли корабль
-                    val updatedShip = updatedPlayerBoard.ships.find { it.id == ship.id }
-                    isSunk = updatedShip?.isSunk == true
+                        var isSunk = false
+                        if (ship != null) {
+                            updatedPlayerBoard = updatedPlayerBoard.updateShip(ship.id, Pair(x, y))
 
-                    if (isSunk) {
-                        Logger.i(TAG, "Player ship sunk by AI: ${ship.id}")
+                            val updatedShip = updatedPlayerBoard.ships.find { it.id == ship.id }
+                            isSunk = updatedShip?.isSunk == true
 
-                        updatedShip?.positions?.forEach { (sx, sy) ->
-                            updatedPlayerBoard = updatedPlayerBoard.updateCell(sx, sy, CellState.SUNK)
+                            if (isSunk) {
+                                Logger.i(TAG, "Player ship sunk by AI: ${ship.id}")
+
+                                updatedShip?.positions?.forEach { (sx, sy) ->
+                                    updatedPlayerBoard = updatedPlayerBoard.updateCell(sx, sy, CellState.SUNK)
+                                }
+
+                                val allPlayerShipsSunk = updatedPlayerBoard.ships.all { it.isSunk }
+                                if (allPlayerShipsSunk) {
+                                    handleGameOver(false, currentState.opponentBoard, updatedPlayerBoard)
+                                    return
+                                }
+                            }
                         }
 
-                        // Проверить, все ли корабли игрока потоплены
-                        val allPlayerShipsSunk = updatedPlayerBoard.ships.all { it.isSunk }
-                        if (allPlayerShipsSunk) {
-                            // Победа AI!
-                            handleGameOver(false, currentState.opponentBoard, updatedPlayerBoard)
-                            return
-                        }
+                        aiOpponent.notifyMoveResult(x, y, hit = true, sunk = isSunk)
+
+                        _gameState.value = currentState.copy(
+                            myBoard = updatedPlayerBoard,
+                            isMyTurn = false
+                        )
+                        _uiState.value = AIGameUiState.AITurn
+
+                        // AI продолжает - цикл повторится
+                        delay(800)
+                        shouldContinue = true
+
+                    } else {
+                        // AI промахнулся
+                        audioManager.playMiss()
+
+                        val updatedPlayerBoard = currentState.myBoard.updateCell(x, y, CellState.MISS)
+                        aiOpponent.notifyMoveResult(x, y, hit = false, sunk = false)
+
+                        _gameState.value = currentState.copy(
+                            myBoard = updatedPlayerBoard,
+                            isMyTurn = true
+                        )
+                        _uiState.value = AIGameUiState.YourTurn
+
+                        // Ход AI завершён
+                        shouldContinue = false
                     }
+
+                } catch (e: Exception) {
+                    Logger.e(TAG, "Failed to make AI move", e)
+                    _uiState.value = AIGameUiState.Error("Ошибка хода AI: ${e.message}")
+                    shouldContinue = false
                 }
-
-                // Уведомить AI о результате
-                aiOpponent.notifyMoveResult(x, y, hit = true, sunk = isSunk)
-
-                _gameState.value = currentState.copy(
-                    myBoard = updatedPlayerBoard,
-                    isMyTurn = false  // AI ходит снова после попадания
-                )
-                _uiState.value = AIGameUiState.AITurn
-
-                // AI ходит снова после попадания
-                delay(800)
-                makeAIMove()
-
             } else {
-                // AI промахнулся
-                audioManager.playMiss()
-
-                val updatedPlayerBoard = currentState.myBoard.updateCell(x, y, CellState.MISS)
-
-                // Уведомить AI о результате
-                aiOpponent.notifyMoveResult(x, y, hit = false, sunk = false)
-
-                _gameState.value = currentState.copy(
-                    myBoard = updatedPlayerBoard,
-                    isMyTurn = true
-                )
-                _uiState.value = AIGameUiState.YourTurn
+                shouldContinue = false
             }
-
-        } catch (e: Exception) {
-            Logger.e(TAG, "Failed to make AI move", e)
-            _uiState.value = AIGameUiState.Error("Ошибка хода AI: ${e.message}")
         }
     }
 

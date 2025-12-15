@@ -76,10 +76,11 @@ class MusicPlayer(private val context: Context) {
      */
     fun setEnabled(enabled: Boolean) {
         isEnabled = enabled
-        if (enabled && isPausedByUser.not()) {
+        if (enabled) {
+            isPausedByUser = false  // Сбрасываем флаг при включении
             start()
         } else {
-            pause()
+            stop()  // Используем stop() вместо pause() для освобождения ресурсов
         }
     }
 

@@ -29,7 +29,7 @@ class EasyAI : AIOpponent {
     override suspend fun getNextMove(opponentBoard: Board): Pair<Int, Int> {
         // Если есть цели для добивания, стреляем по ним
         if (targetQueue.isNotEmpty()) {
-            val target = targetQueue.removeFirst()
+            val target = targetQueue.removeAt(0)
             Logger.d(TAG, "Targeting queued position: $target")
             return target
         }

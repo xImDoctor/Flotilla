@@ -245,12 +245,43 @@ private fun OnlineGameScaffold(
     onCellClick: (Int, Int) -> Unit,
     onExitGame: () -> Unit
 ) {
+    var showExitDialog by remember { mutableStateOf(false) }
+
+    // Диалог подтверждения выхода
+    if (showExitDialog) {
+        AlertDialog(
+            onDismissRequest = { showExitDialog = false },
+            title = { Text("Выйти из игры?") },
+            text = { Text("Текущая игра будет потеряна. Вы уверены?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showExitDialog = false
+                    onExitGame()
+                }) {
+                    Text("Выйти", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExitDialog = false }) {
+                    Text("Отмена")
+                }
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.game_title)) },
                 actions = {
-                    TextButton(onClick = onExitGame) {
+                    TextButton(onClick = {
+                        // Показываем диалог только если игра не завершена
+                        if (gameState?.gameOver == false) {
+                            showExitDialog = true
+                        } else {
+                            onExitGame()
+                        }
+                    }) {
                         Text(stringResource(R.string.common_exit))
                     }
                 }

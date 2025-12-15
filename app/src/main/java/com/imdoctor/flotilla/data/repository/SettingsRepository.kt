@@ -47,6 +47,7 @@ class SettingsRepository(
     val nicknameFlow: Flow<String> = localDataStore.nicknameFlow
     val showCoordinatesFlow: Flow<Boolean> = localDataStore.showCoordinatesFlow
     val musicEnabledFlow: Flow<Boolean> = localDataStore.musicEnabledFlow
+    val musicTrackFlow: Flow<String> = localDataStore.musicTrackFlow
     val soundEffectsEnabledFlow: Flow<Boolean> = localDataStore.soundEffectsEnabledFlow
     val animationsEnabledFlow: Flow<Boolean> = localDataStore.animationsEnabledFlow
     val vibrationEnabledFlow: Flow<Boolean> = localDataStore.vibrationEnabledFlow
@@ -180,6 +181,20 @@ class SettingsRepository(
                 syncSettingsToFirebase(userId)
             }
 
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Сохранение выбранного фонового трека
+     *
+     * ВАЖНО: Эта настройка хранится ТОЛЬКО локально и НЕ синхронизируется с Firebase
+     */
+    suspend fun setMusicTrack(trackId: String): Result<Unit> {
+        return try {
+            localDataStore.setMusicTrack(trackId)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

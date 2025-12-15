@@ -1,12 +1,14 @@
 package com.imdoctor.flotilla.presentation.screens.game
 
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.imdoctor.flotilla.R
@@ -24,12 +26,43 @@ fun AIGameScaffold(
     onCellClick: (Int, Int) -> Unit,
     onExitGame: () -> Unit
 ) {
+    var showExitDialog by remember { mutableStateOf(false) }
+
+    // Диалог подтверждения выхода
+    if (showExitDialog) {
+        AlertDialog(
+            onDismissRequest = { showExitDialog = false },
+            title = { Text("Выйти из игры?") },
+            text = { Text("Текущая игра будет потеряна. Вы уверены?") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showExitDialog = false
+                    onExitGame()
+                }) {
+                    Text("Выйти", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExitDialog = false }) {
+                    Text("Отмена")
+                }
+            }
+        )
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.game_title)) },
                 actions = {
-                    TextButton(onClick = onExitGame) {
+                    TextButton(onClick = {
+                        // Показываем диалог только если игра не завершена
+                        if (gameState?.gameOver == false) {
+                            showExitDialog = true
+                        } else {
+                            onExitGame()
+                        }
+                    }) {
                         Text(stringResource(R.string.common_exit))
                     }
                 }
@@ -99,9 +132,21 @@ private fun AIGameContent(
                 )
             }
             is AIGameViewModel.AIGameUiState.AITurn -> {
+                val infiniteTransition = rememberInfiniteTransition(label = "ai_thinking")
+                val alpha by infiniteTransition.animateFloat(
+                    initialValue = 0.3f,
+                    targetValue = 1f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(800, easing = FastOutSlowInEasing),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "alpha"
+                )
+
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.alpha(alpha)
                 ) {
                     CircularProgressIndicator(modifier = Modifier.size(20.dp))
                     Text(

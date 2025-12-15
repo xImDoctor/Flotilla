@@ -63,10 +63,14 @@
     <string name="settings_show_coordinates">Показывать координаты</string>
     <string name="settings_audio_effects_title">Аудио и эффекты</string>
     <string name="settings_background_music">Фоновая музыка</string>
+    <string name="settings_music_track_title">Фоновый трек</string>
+    <string name="settings_music_track_cats_cradle">Cat\'s Cradle</string>
+    <string name="settings_music_track_hibiscus">Hibiscus</string>
     <string name="settings_sound_effects">Звуковые эффекты</string>
     <string name="settings_animations">Анимация</string>
     <string name="settings_vibration">Вибрация</string>
     <string name="settings_set_default">По умолчанию</string>
+    <string name="settings_credits_button">Об игре</string>
 
     <!-- User Registration Screen -->
     <string name="registration_title">FLOTILLA</string>
@@ -79,4 +83,15 @@
     <string name="registration_creating_profile">Создаём ваш профиль…</string>
     <string name="registration_rules_title">Правила никнейма:</string>
     <string name="registration_rules_description">• Минимум 3 символа\n• Максимум 20 символов\n• Разрешены буквы, цифры, подчёркивание и дефис</string>
+
+    <!-- Credits Dialog -->
+    <string name="credits_title">Об игре</string>
+    <string name="credits_developer_title">Разработчик</string>
+    <string name="credits_developer_name">ImDoctor</string>
+    <string name="credits_music_title">Фоновая музыка</string>
+    <string name="credits_music_purrple_cat">Cat\'s Cradle &amp; Hibiscus by Purrple Cat</string>
+    <string name="credits_music_link">https://purrplecat.com/</string>
+    <string name="credits_music_license">Creative Commons CC BY-SA 3.0</string>
+    <string name="credits_music_chosic">Музыка продвигается на https://www.chosic.com/free-music/all/</string>
+    <string name="credits_close">Закрыть</string>
 </resources>

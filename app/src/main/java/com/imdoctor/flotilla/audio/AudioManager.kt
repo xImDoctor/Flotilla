@@ -37,6 +37,21 @@ class AudioManager(private val context: Context) {
     }
 
     /**
+     * Подписка на изменения выбранного фонового трека
+     *
+     * @param flow Flow с выбранным треком
+     * @param scope Корутиновый scope для подписки
+     */
+    fun observeMusicTrackSetting(flow: Flow<String>, scope: CoroutineScope) {
+        scope.launch(Dispatchers.Main) {
+            flow.collect { trackId ->
+                Logger.d(TAG, "Music track changed: $trackId")
+                musicPlayer.setTrack(trackId)
+            }
+        }
+    }
+
+    /**
      * Подписка на изменения настройки звуковых эффектов
      *
      * @param flow Flow с настройкой soundEffectsEnabled

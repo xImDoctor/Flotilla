@@ -35,6 +35,7 @@ class SettingsDataStore(private val context: Context) {
         private val NICKNAME_KEY = stringPreferencesKey("nickname")
         private val SHOW_COORDINATES_KEY = booleanPreferencesKey("show_coordinates")
         private val MUSIC_ENABLED_KEY = booleanPreferencesKey("music_enabled")
+        private val MUSIC_TRACK_KEY = stringPreferencesKey("music_track")
         private val SOUND_EFFECTS_ENABLED_KEY = booleanPreferencesKey("sound_effects_enabled")
         private val ANIMATIONS_ENABLED_KEY = booleanPreferencesKey("animations_enabled")
         private val VIBRATION_ENABLED_KEY = booleanPreferencesKey("vibration_enabled")
@@ -44,6 +45,7 @@ class SettingsDataStore(private val context: Context) {
         private const val DEFAULT_NICKNAME = "Player"
         private const val DEFAULT_SHOW_COORDINATES = true
         private const val DEFAULT_MUSIC_ENABLED = true
+        private const val DEFAULT_MUSIC_TRACK = "cats_cradle"
         private const val DEFAULT_SOUND_EFFECTS_ENABLED = true
         private const val DEFAULT_ANIMATIONS_ENABLED = true
         private const val DEFAULT_VIBRATION_ENABLED = true
@@ -76,6 +78,14 @@ class SettingsDataStore(private val context: Context) {
     val musicEnabledFlow: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
             preferences[MUSIC_ENABLED_KEY] ?: DEFAULT_MUSIC_ENABLED
+        }
+
+    /**
+     * Flow с выбранным фоновым треком
+     */
+    val musicTrackFlow: Flow<String> = context.dataStore.data
+        .map { preferences ->
+            preferences[MUSIC_TRACK_KEY] ?: DEFAULT_MUSIC_TRACK
         }
 
     /**
@@ -144,6 +154,17 @@ class SettingsDataStore(private val context: Context) {
     suspend fun setMusicEnabled(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[MUSIC_ENABLED_KEY] = enabled
+        }
+    }
+
+    /**
+     * Сохранение выбранного фонового трека
+     *
+     * @param trackId ID трека ("cats_cradle" или "hibiscus")
+     */
+    suspend fun setMusicTrack(trackId: String) {
+        context.dataStore.edit { preferences ->
+            preferences[MUSIC_TRACK_KEY] = trackId
         }
     }
 
@@ -219,6 +240,7 @@ class SettingsDataStore(private val context: Context) {
             nickname = preferences[NICKNAME_KEY] ?: DEFAULT_NICKNAME,
             showCoordinates = preferences[SHOW_COORDINATES_KEY] ?: DEFAULT_SHOW_COORDINATES,
             musicEnabled = preferences[MUSIC_ENABLED_KEY] ?: DEFAULT_MUSIC_ENABLED,
+            musicTrack = preferences[MUSIC_TRACK_KEY] ?: DEFAULT_MUSIC_TRACK,
             soundEffectsEnabled = preferences[SOUND_EFFECTS_ENABLED_KEY] ?: DEFAULT_SOUND_EFFECTS_ENABLED,
             animationsEnabled = preferences[ANIMATIONS_ENABLED_KEY] ?: DEFAULT_ANIMATIONS_ENABLED,
             vibrationEnabled = preferences[VIBRATION_ENABLED_KEY] ?: DEFAULT_VIBRATION_ENABLED,
@@ -236,6 +258,7 @@ data class SettingsSnapshot(
     val nickname: String,
     val showCoordinates: Boolean,
     val musicEnabled: Boolean,
+    val musicTrack: String,
     val soundEffectsEnabled: Boolean,
     val animationsEnabled: Boolean,
     val vibrationEnabled: Boolean,

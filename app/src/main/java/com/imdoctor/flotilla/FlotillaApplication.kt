@@ -66,6 +66,12 @@ class FlotillaApplication : Application() {
                 this
             )
 
+            // Подписываемся на изменения выбранного фонового трека
+            AppContainer.audioManager.observeMusicTrackSetting(
+                AppContainer.settingsRepository.musicTrackFlow,
+                this
+            )
+
             // Подписываемся на изменения настроек звуковых эффектов
             AppContainer.audioManager.observeSoundEffectsSetting(
                 AppContainer.settingsRepository.soundEffectsEnabledFlow,

@@ -75,6 +75,16 @@ class SettingsViewModel(
         )
 
     /**
+     * Выбранный фоновый трек
+     */
+    val musicTrack: StateFlow<String> = settingsRepository.musicTrackFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = "cats_cradle"
+        )
+
+    /**
      * Звуковые эффекты включены
      */
     val soundEffectsEnabled: StateFlow<Boolean> = settingsRepository.soundEffectsEnabledFlow
@@ -167,6 +177,17 @@ class SettingsViewModel(
     fun toggleMusic(enabled: Boolean) {
         viewModelScope.launch {
             settingsRepository.setMusicEnabled(enabled)
+        }
+    }
+
+    /**
+     * Изменение фонового трека
+     *
+     * @param trackId ID трека ("cats_cradle" или "hibiscus")
+     */
+    fun setMusicTrack(trackId: String) {
+        viewModelScope.launch {
+            settingsRepository.setMusicTrack(trackId)
         }
     }
 

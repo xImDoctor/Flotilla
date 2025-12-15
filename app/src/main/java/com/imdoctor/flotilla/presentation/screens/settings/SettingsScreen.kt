@@ -6,6 +6,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,10 +34,14 @@ fun SettingsScreen(
     val nickname by viewModel.nickname.collectAsStateWithLifecycle()
     val showCoordinates by viewModel.showCoordinates.collectAsStateWithLifecycle()
     val musicEnabled by viewModel.musicEnabled.collectAsStateWithLifecycle()
+    val musicTrack by viewModel.musicTrack.collectAsStateWithLifecycle()
     val soundEffectsEnabled by viewModel.soundEffectsEnabled.collectAsStateWithLifecycle()
     val animationsEnabled by viewModel.animationsEnabled.collectAsStateWithLifecycle()
     val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
     val nicknameUpdateResult by viewModel.nicknameUpdateResult.collectAsStateWithLifecycle()
+
+    // Локальное состояние для диалога Credits
+    var showCreditsDialog by remember { mutableStateOf(false) }
 
     // Локальное состояние для редактирования никнейма
     var nicknameInput by remember { mutableStateOf(nickname) }
@@ -166,6 +171,15 @@ fun SettingsScreen(
                 onCheckedChange = { viewModel.toggleMusic(it) }
             )
 
+            // Выбор фонового трека (только если музыка включена)
+            if (musicEnabled) {
+                MusicTrackSelector(
+                    selectedTrack = musicTrack,
+                    onTrackSelected = { viewModel.setMusicTrack(it) },
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+            }
+
             SettingsRow(
                 label = stringResource(R.string.settings_sound_effects),
                 checked = soundEffectsEnabled,
@@ -185,7 +199,21 @@ fun SettingsScreen(
             )
             
             Spacer(modifier = Modifier.weight(1f))
-            
+
+            // Кнопка Credits
+            OutlinedButton(
+                onClick = { showCreditsDialog = true },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(stringResource(R.string.settings_credits_button))
+            }
+
             // Кнопка сброса настроек
             OutlinedButton(
                 onClick = { viewModel.resetToDefaults() },
@@ -195,11 +223,16 @@ fun SettingsScreen(
             }
         }
     }
+
+    // Диалог Credits
+    if (showCreditsDialog) {
+        CreditsDialog(onDismiss = { showCreditsDialog = false })
+    }
 }
 
 /**
  * Переиспользуемый компонент строки настройки с Switch
- * 
+ *
  * @param label Текст настройки
  * @param checked Состояние переключателя
  * @param onCheckedChange Callback изменения состояния
@@ -228,4 +261,125 @@ private fun SettingsRow(
             onCheckedChange = onCheckedChange
         )
     }
+}
+
+/**
+ * Компонент выбора фонового трека
+ *
+ * @param selectedTrack ID выбранного трека
+ * @param onTrackSelected Callback выбора трека
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MusicTrackSelector(
+    selectedTrack: String,
+    onTrackSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    val trackOptions = mapOf(
+        "cats_cradle" to stringResource(R.string.settings_music_track_cats_cradle),
+        "hibiscus" to stringResource(R.string.settings_music_track_hibiscus)
+    )
+
+    Column(modifier = modifier) {
+        Text(
+            text = stringResource(R.string.settings_music_track_title),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = it }
+        ) {
+            OutlinedTextField(
+                value = trackOptions[selectedTrack] ?: "",
+                onValueChange = {},
+                readOnly = true,
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth(),
+                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+            )
+
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                trackOptions.forEach { (trackId, trackName) ->
+                    DropdownMenuItem(
+                        text = { Text(trackName) },
+                        onClick = {
+                            onTrackSelected(trackId)
+                            expanded = false
+                        },
+                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Диалог с информацией об игре и credits
+ */
+@Composable
+private fun CreditsDialog(onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.credits_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                // Разработчик
+                Text(
+                    text = stringResource(R.string.credits_developer_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = stringResource(R.string.credits_developer_name),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                HorizontalDivider()
+
+                // Музыка
+                Text(
+                    text = stringResource(R.string.credits_music_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = stringResource(R.string.credits_music_purrple_cat),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = stringResource(R.string.credits_music_link),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+                Text(
+                    text = stringResource(R.string.credits_music_license),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = stringResource(R.string.credits_music_chosic),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.credits_close))
+            }
+        }
+    )
 }

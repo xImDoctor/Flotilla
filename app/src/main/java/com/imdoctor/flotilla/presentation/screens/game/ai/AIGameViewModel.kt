@@ -211,8 +211,13 @@ class AIGameViewModel(
                             // Корабль потоплен!
                             Logger.i(TAG, "AI ship sunk: ${ship.id}")
 
-                            updatedShip.positions.forEach { (sx, sy) ->
-                                updatedVisibleBoard = updatedVisibleBoard.updateCell(sx, sy, CellState.SUNK)
+                            updatedShip?.let { sunkShip ->
+                                sunkShip.positions.forEach { (sx, sy) ->
+                                    updatedVisibleBoard = updatedVisibleBoard.updateCell(sx, sy, CellState.SUNK)
+                                }
+
+                                // Автоматически пометить все клетки вокруг корабля как MISS
+                                updatedVisibleBoard = markSurroundingCellsAsMiss(updatedVisibleBoard, sunkShip.positions)
                             }
 
                             // Проверить, все ли корабли AI потоплены
@@ -297,8 +302,13 @@ class AIGameViewModel(
                             if (isSunk) {
                                 Logger.i(TAG, "Player ship sunk by AI: ${ship.id}")
 
-                                updatedShip?.positions?.forEach { (sx, sy) ->
-                                    updatedPlayerBoard = updatedPlayerBoard.updateCell(sx, sy, CellState.SUNK)
+                                updatedShip?.let { sunkShip ->
+                                    sunkShip.positions.forEach { (sx, sy) ->
+                                        updatedPlayerBoard = updatedPlayerBoard.updateCell(sx, sy, CellState.SUNK)
+                                    }
+
+                                    // Автоматически пометить все клетки вокруг корабля как MISS
+                                    updatedPlayerBoard = markSurroundingCellsAsMiss(updatedPlayerBoard, sunkShip.positions)
                                 }
 
                                 val allPlayerShipsSunk = updatedPlayerBoard.ships.all { it.isSunk }
@@ -347,6 +357,49 @@ class AIGameViewModel(
                 shouldContinue = false
             }
         }
+    }
+
+    /**
+     * Пометить все клетки вокруг потопленного корабля как MISS
+     *
+     * @param board Игровое поле
+     * @param shipPositions Позиции потопленного корабля
+     * @return Обновленное поле с помеченными клетками
+     */
+    private fun markSurroundingCellsAsMiss(
+        board: Board,
+        shipPositions: List<Pair<Int, Int>>
+    ): Board {
+        var updatedBoard = board
+        val cellsToMark = mutableSetOf<Pair<Int, Int>>()
+
+        // Для каждой клетки корабля найти все 8 соседних клеток (включая диагонали)
+        shipPositions.forEach { (x, y) ->
+            for (dx in -1..1) {
+                for (dy in -1..1) {
+                    if (dx == 0 && dy == 0) continue  // Пропустить саму клетку корабля
+
+                    val nx = x + dx
+                    val ny = y + dy
+
+                    // Проверить что клетка в пределах поля
+                    if (nx in 0..9 && ny in 0..9) {
+                        cellsToMark.add(Pair(nx, ny))
+                    }
+                }
+            }
+        }
+
+        // Пометить клетки как MISS, если они EMPTY
+        cellsToMark.forEach { (x, y) ->
+            val cell = updatedBoard.getCell(x, y)
+            if (cell?.state == CellState.EMPTY) {
+                updatedBoard = updatedBoard.updateCell(x, y, CellState.MISS)
+                Logger.d(TAG, "Marked surrounding cell as MISS: ($x, $y)")
+            }
+        }
+
+        return updatedBoard
     }
 
     /**

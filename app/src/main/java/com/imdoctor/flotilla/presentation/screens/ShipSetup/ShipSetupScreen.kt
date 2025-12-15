@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -36,6 +37,39 @@ import com.imdoctor.flotilla.R
 import com.imdoctor.flotilla.presentation.theme.FlotillaColors
 import com.imdoctor.flotilla.utils.ShipPlacementValidator
 import kotlin.math.roundToInt
+
+/**
+ * Адаптивные размеры для ShipSetupScreen
+ */
+private object ShipSetupDimens {
+    @Composable
+    fun gridAspectRatio(): Float {
+        val screenHeight = LocalConfiguration.current.screenHeightDp
+        return when {
+            screenHeight < 700 -> 0.80f  // Маленькие телефоны
+            screenHeight < 900 -> 0.85f  // Обычные телефоны
+            else -> 1.0f                 // Планшеты (квадрат)
+        }
+    }
+
+    @Composable
+    fun spacerSmall(): Dp {
+        val screenHeight = LocalConfiguration.current.screenHeightDp
+        return if (screenHeight < 700) 6.dp else 8.dp
+    }
+
+    @Composable
+    fun spacerMedium(): Dp {
+        val screenHeight = LocalConfiguration.current.screenHeightDp
+        return if (screenHeight < 700) 11.dp else 16.dp
+    }
+
+    @Composable
+    fun spacerLarge(): Dp {
+        val screenHeight = LocalConfiguration.current.screenHeightDp
+        return if (screenHeight < 700) 16.dp else 24.dp
+    }
+}
 
 /**
  * Экран расстановки кораблей с drag-and-drop интерфейсом
@@ -116,7 +150,7 @@ fun ShipSetupScreen(
                     fontWeight = FontWeight.Bold
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(ShipSetupDimens.spacerSmall()))
 
                 // Палитра кораблей
                 ShipPalette(
@@ -128,26 +162,82 @@ fun ShipSetupScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(ShipSetupDimens.spacerMedium()))
 
-                // Игровое поле
-                GameGrid(
-                    placedShips = uiState.placedShips,
-                    showCoordinates = showCoordinates,
-                    onShipTap = { shipId ->
-                        viewModel.rotateShip(shipId)
-                    },
-                    onShipRemove = { shipId ->
-                        viewModel.removeShip(shipId)
-                    },
-                    onPositionUpdate = { position, size ->
-                        gridPosition = position
-                        cellSize = size
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                // Игровое поле с drag overlay
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    GameGrid(
+                        placedShips = uiState.placedShips,
+                        showCoordinates = showCoordinates,
+                        onShipTap = { shipId ->
+                            viewModel.rotateShip(shipId)
+                        },
+                        onShipRemove = { shipId ->
+                            viewModel.removeShip(shipId)
+                        },
+                        onPositionUpdate = { position, size ->
+                            gridPosition = position
+                            cellSize = size
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(ShipSetupDimens.gridAspectRatio())
+                    )
 
-                Spacer(modifier = Modifier.height(24.dp))
+                    // Drag overlay - ТОЛЬКО над grid area
+                    if (draggedShip != null) {
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()  // Размер grid Box, не fillMaxSize
+                                .pointerInput(Unit) {
+                                    detectDragGestures(
+                                        onDragStart = { offset ->
+                                            dragOffset = offset
+                                        },
+                                        onDrag = { _, delta ->
+                                            dragOffset += delta
+                                        },
+                                        onDragEnd = {
+                                            // Координаты относительно grid (уже учтены header'ы в gridPosition)
+                                            val relativeX = dragOffset.x
+                                            val relativeY = dragOffset.y
+
+                                            val cellX = (relativeX / cellSize).toInt()
+                                            val cellY = (relativeY / cellSize).toInt()
+
+                                            if (cellX in 0..9 && cellY in 0..9 && draggedShip != null) {
+                                                viewModel.placeShip(
+                                                    draggedShip!!,
+                                                    cellX,
+                                                    cellY,
+                                                    dragOrientation
+                                                )
+                                            }
+
+                                            draggedShip = null
+                                            dragOffset = Offset.Zero
+                                        },
+                                        onDragCancel = {
+                                            draggedShip = null
+                                            dragOffset = Offset.Zero
+                                        }
+                                    )
+                                }
+                        ) {
+                            // Preview внутри drag box
+                            draggedShip?.let { ship ->
+                                DraggedShipPreview(
+                                    ship = ship,
+                                    orientation = dragOrientation,
+                                    offset = dragOffset,
+                                    cellSize = cellSize
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(ShipSetupDimens.spacerLarge()))
 
                 // Кнопки управления
                 Row(
@@ -178,7 +268,7 @@ fun ShipSetupScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(ShipSetupDimens.spacerMedium()))
 
                 // Кнопка готовности
                 Button(
@@ -218,64 +308,7 @@ fun ShipSetupScreen(
                         fontWeight = FontWeight.Bold
                     )
                 }
-
-                Spacer(modifier = Modifier.height(32.dp))
             }
-
-            // Визуализация перетаскиваемого корабля
-            draggedShip?.let { ship ->
-                DraggedShipPreview(
-                    ship = ship,
-                    orientation = dragOrientation,
-                    offset = dragOffset,
-                    cellSize = cellSize,
-                    modifier = Modifier.fillMaxSize()
-                )
-            }
-        }
-
-        // Обработка drag-and-drop
-        if (draggedShip != null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .pointerInput(Unit) {
-                        detectDragGestures(
-                            onDragStart = { offset ->
-                                dragOffset = offset
-                            },
-                            onDrag = { _, delta ->
-                                dragOffset += delta
-                            },
-                            onDragEnd = {
-                                // Определить клетку, куда упал корабль
-                                val relativeX = dragOffset.x - gridPosition.x
-                                val relativeY = dragOffset.y - gridPosition.y
-
-                                val cellX = (relativeX / cellSize).toInt()
-                                val cellY = (relativeY / cellSize).toInt()
-
-                                // Разместить корабль, если клетка валидна
-                                if (cellX in 0..9 && cellY in 0..9 && draggedShip != null) {
-                                    viewModel.placeShip(
-                                        draggedShip!!,
-                                        cellX,
-                                        cellY,
-                                        dragOrientation
-                                    )
-                                }
-
-                                // Сбросить состояние перетаскивания
-                                draggedShip = null
-                                dragOffset = Offset.Zero
-                            },
-                            onDragCancel = {
-                                draggedShip = null
-                                dragOffset = Offset.Zero
-                            }
-                        )
-                    }
-            )
         }
     }
 }
@@ -402,90 +435,128 @@ private fun GameGrid(
         BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(1f)
                 .padding(8.dp)
-                .onGloballyPositioned { coordinates ->
-                    val position = coordinates.positionInRoot()
-                    val size = coordinates.size.width.toFloat()
-                    onPositionUpdate(position, size / 10f)
-                }
         ) {
-            val gridSize = with(density) { maxWidth.toPx() }
+            val totalSize = with(density) { maxWidth.toPx() }
+            val headerSize = if (showCoordinates) 24.dp else 0.dp
+            val headerSizePx = with(density) { headerSize.toPx() }
+            val gridSize = totalSize - headerSizePx
             val cellSizePx = gridSize / 10f
             val cellSizeDp = with(density) { cellSizePx.toDp() }
 
-            // Фон сетки
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(FlotillaColors.Background)
-            )
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // Header row с буквами столбцов (A-J)
+                if (showCoordinates) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Box(modifier = Modifier.size(headerSize))  // Угловая пустая клетка
 
-            // Сетка
-            Column(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                for (y in 0..9) {
-                    Row(
-                        modifier = Modifier.weight(1f)
-                    ) {
                         for (x in 0..9) {
-                            GridCell(
-                                x = x,
-                                y = y,
-                                showCoordinates = showCoordinates,
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .fillMaxHeight()
+                            Box(
+                                modifier = Modifier.size(cellSizeDp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = ('A' + x).toString(),
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = FlotillaColors.OnSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Строки с номерами и клетками
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .onGloballyPositioned { coordinates ->
+                            val position = coordinates.positionInRoot()
+                            // Передаём позицию игровой зоны (без headers)
+                            val adjustedPosition = if (showCoordinates) {
+                                Offset(
+                                    position.x + headerSizePx,
+                                    position.y
+                                )
+                            } else {
+                                position
+                            }
+                            onPositionUpdate(adjustedPosition, cellSizePx)
+                        }
+                ) {
+                    // Фон сетки
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(cellSizeDp * 10)
+                            .background(FlotillaColors.Background)
+                    )
+
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        // Левая колонка с номерами строк
+                        if (showCoordinates) {
+                            Column {
+                                for (y in 0..9) {
+                                    Box(
+                                        modifier = Modifier.size(headerSize, cellSizeDp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = (y + 1).toString(),
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = FlotillaColors.OnSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // Игровая сетка 10x10
+                        Column {
+                            for (y in 0..9) {
+                                Row {
+                                    for (x in 0..9) {
+                                        GridCell(
+                                            modifier = Modifier.size(cellSizeDp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Размещённые корабли (overlay)
+                    if (showCoordinates) {
+                        Spacer(modifier = Modifier.width(headerSize))
+                    }
+                    Box(modifier = Modifier.size(cellSizeDp * 10)) {
+                        placedShips.forEach { (shipId, ship) ->
+                            PlacedShipVisual(
+                                ship = ship,
+                                cellSize = cellSizeDp,
+                                onTap = { onShipTap(shipId) },
+                                onLongPress = { onShipRemove(shipId) }
                             )
                         }
                     }
                 }
-            }
-
-            // Размещённые корабли
-            placedShips.forEach { (shipId, ship) ->
-                PlacedShipVisual(
-                    ship = ship,
-                    cellSize = cellSizeDp,
-                    onTap = { onShipTap(shipId) },
-                    onLongPress = { onShipRemove(shipId) }
-                )
             }
         }
     }
 }
 
 /**
- * Одна клетка сетки
+ * Одна клетка сетки (без координат внутри)
  */
 @Composable
 private fun GridCell(
-    x: Int,
-    y: Int,
-    showCoordinates: Boolean,
     modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
-            .border(0.5.dp, FlotillaColors.Outline),
-        contentAlignment = Alignment.Center
-    ) {
-        if (showCoordinates && (x == 0 || y == 0)) {
-            Text(
-                text = if (x == 0 && y > 0) {
-                    ('A' + y - 1).toString()
-                } else if (y == 0 && x > 0) {
-                    x.toString()
-                } else {
-                    ""
-                },
-                style = MaterialTheme.typography.labelSmall,
-                color = FlotillaColors.OnSurfaceVariant,
-                fontSize = 8.sp
-            )
-        }
-    }
+            .border(0.5.dp, FlotillaColors.Outline)
+    )
 }
 
 /**

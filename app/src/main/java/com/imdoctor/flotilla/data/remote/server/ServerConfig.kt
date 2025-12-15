@@ -6,56 +6,25 @@ import com.imdoctor.flotilla.BuildConfig
  * Конфигурация сервера Flotilla
  *
  * Конфигурация загружается из local.properties (НЕ коммитится в Git!)
- * См. local.properties.example для инструкций
- *
- * !!!!!! Устройство и ПК должны быть в одной WiFi сети!!!!!!!!
+ * Укажите flotilla.server.production.url=http://YOUR_SERVER_IP:8000
  */
 object ServerConfig {
     /**
-     * Локальный IP адрес вашего ПК (из local.properties)
-     *
-     * !!!!!!!!! в local.properties:
-     * flotilla.server.local.ip=IP
+     * Production сервер URL (из local.properties)
      */
-    private val LOCAL_IP = BuildConfig.SERVER_LOCAL_IP
-
-    /**
-     * Порт сервера (из local.properties)
-     */
-    private val LOCAL_PORT = BuildConfig.SERVER_LOCAL_PORT
-
-    /**
-     * Production URL (из local.properties, для будущего)
-     */
-    private val PRODUCTION_URL = BuildConfig.SERVER_PRODUCTION_URL
-
-    /**
-     * Переключатель между локальной разработкой и production
-     *
-     * В debug build всегда используется локальный сервер
-     * В release build используется production
-     */
-    val USE_LOCAL = BuildConfig.DEBUG
+    private val SERVER_URL = BuildConfig.SERVER_PRODUCTION_URL
 
     /**
      * Базовый HTTP URL
      */
-    val BASE_URL: String
-        get() = if (USE_LOCAL) {
-            "http://$LOCAL_IP:$LOCAL_PORT"
-        } else {
-            PRODUCTION_URL
-        }
+    val BASE_URL: String = SERVER_URL
 
     /**
      * WebSocket URL
      */
-    val WS_URL: String
-        get() = if (USE_LOCAL) {
-            "ws://$LOCAL_IP:$LOCAL_PORT"
-        } else {
-            PRODUCTION_URL.replace("https://", "wss://")
-        }
+    val WS_URL: String = SERVER_URL
+        .replace("https://", "wss://")
+        .replace("http://", "ws://")
 
     // API Endpoints
     object Api {

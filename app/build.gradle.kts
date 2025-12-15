@@ -20,7 +20,7 @@ android {
         minSdk = 29
         targetSdk = 36
         versionCode = 1
-        versionName = "0.7.5b"
+        versionName = "0.9.1b"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -32,21 +32,11 @@ android {
             properties.load(localProperties.inputStream())
         }
 
-        // Добавляем в BuildConfig (доступно в коде как BuildConfig.SERVER_LOCAL_IP)
-        buildConfigField(
-            "String",
-            "SERVER_LOCAL_IP",
-            "\"${properties.getProperty("flotilla.server.local.ip", "192.168.1.100")}\""
-        )
-        buildConfigField(
-            "int",
-            "SERVER_LOCAL_PORT",
-            properties.getProperty("flotilla.server.local.port", "8000")
-        )
+        // URL сервера в BuildConfig
         buildConfigField(
             "String",
             "SERVER_PRODUCTION_URL",
-            "\"${properties.getProperty("flotilla.server.production.url", "https://flotilla-server.com")}\""
+            "\"${properties.getProperty("flotilla.server.production.url", "http://45.142.36.198:8000")}\""
         )
     }
 

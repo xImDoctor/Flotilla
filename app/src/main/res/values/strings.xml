@@ -77,6 +77,7 @@
     <string name="settings_nickname_error_network">Ошибка сети. Проверьте подключение</string>
     <string name="settings_grid_title">Настройки сетки</string>
     <string name="settings_show_coordinates">Показывать координаты</string>
+    <string name="settings_show_coordinates_wip">Фича в доработке</string>
     <string name="settings_grid_aspect_ratio">Пропорции игрового поля</string>
     <string name="settings_audio_effects_title">Аудио и эффекты</string>
     <string name="settings_background_music">Фоновая музыка</string>

@@ -45,7 +45,7 @@ class SettingsDataStore(private val context: Context) {
 
         // Дефолтные значения
         private const val DEFAULT_NICKNAME = "Player"
-        private const val DEFAULT_SHOW_COORDINATES = true
+        private const val DEFAULT_SHOW_COORDINATES = false  // Временно отключено (в доработке)
         private const val DEFAULT_MUSIC_ENABLED = true
         private const val DEFAULT_MUSIC_TRACK = "cats_cradle"
         private const val DEFAULT_SOUND_EFFECTS_ENABLED = true

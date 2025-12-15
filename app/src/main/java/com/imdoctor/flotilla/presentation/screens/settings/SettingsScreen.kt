@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -55,6 +56,9 @@ fun SettingsScreen(
 
     // Snackbar host для показа сообщений
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // Coroutine scope для показа Snackbar
+    val coroutineScope = rememberCoroutineScope()
 
     // Context для доступа к ресурсам
     val context = LocalContext.current
@@ -153,11 +157,27 @@ fun SettingsScreen(
                 style = MaterialTheme.typography.titleMedium
             )
 
-            SettingsRow(
-                label = stringResource(R.string.settings_show_coordinates),
-                checked = showCoordinates,
-                onCheckedChange = { viewModel.toggleShowCoordinates(it) }
-            )
+            // Координатная сетка (временно отключена)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        // Показываем подсказку о том, что фича в доработке
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = context.getString(R.string.settings_show_coordinates_wip),
+                                duration = SnackbarDuration.Short
+                            )
+                        }
+                    }
+            ) {
+                SettingsRow(
+                    label = stringResource(R.string.settings_show_coordinates),
+                    checked = showCoordinates,
+                    onCheckedChange = { }, // Пустой callback, так как disabled
+                    enabled = false
+                )
+            }
             
             HorizontalDivider()
 
@@ -249,29 +269,43 @@ fun SettingsScreen(
  * @param label Текст настройки
  * @param checked Состояние переключателя
  * @param onCheckedChange Callback изменения состояния
+ * @param enabled Включена ли настройка (влияет на цвет текста и Switch)
  */
 @Composable
 private fun SettingsRow(
     label: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable { onCheckedChange(!checked) }
+            .then(
+                if (enabled) {
+                    Modifier.clickable { onCheckedChange(!checked) }
+                } else {
+                    Modifier
+                }
+            )
             .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.bodyLarge
+            style = MaterialTheme.typography.bodyLarge,
+            color = if (enabled) {
+                MaterialTheme.colorScheme.onSurface
+            } else {
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            }
         )
         Switch(
             checked = checked,
-            onCheckedChange = onCheckedChange
+            onCheckedChange = onCheckedChange,
+            enabled = enabled
         )
     }
 }

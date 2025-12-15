@@ -44,9 +44,14 @@ import kotlin.math.roundToInt
  */
 private object ShipSetupDimens {
     @Composable
-    fun gridAspectRatio(userPreference: Float): Float {
-        // Используем значение из настроек
-        return userPreference
+    fun gridAspectRatio(): Float {
+        val screenHeight = LocalConfiguration.current.screenHeightDp
+        // Автоматический выбор пропорций на основе высоты экрана
+        return when {
+            screenHeight < 700 -> 0.9f  // Более квадратная сетка для маленьких экранов
+            screenHeight < 800 -> 0.85f
+            else -> 0.8f  // Вытянутая сетка для больших экранов
+        }
     }
 
     @Composable
@@ -85,10 +90,6 @@ fun ShipSetupScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val showCoordinates by viewModel.showCoordinates.collectAsStateWithLifecycle()
     val animationsEnabled by viewModel.animationsEnabled.collectAsStateWithLifecycle()
-
-    // Настройка пропорций игровой сетки из настроек
-    val gridAspectRatio by AppContainer.settingsRepository.gridAspectRatioFlow
-        .collectAsState(initial = 0.8f)
 
     // Состояние перетаскивания
     var draggedShip by remember { mutableStateOf<ShipTemplate?>(null) }
@@ -182,7 +183,7 @@ fun ShipSetupScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .aspectRatio(ShipSetupDimens.gridAspectRatio(gridAspectRatio))
+                            .aspectRatio(ShipSetupDimens.gridAspectRatio())
                     )
 
                     // Drag overlay - ТОЛЬКО над grid area

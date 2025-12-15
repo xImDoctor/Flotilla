@@ -41,7 +41,6 @@ class SettingsDataStore(private val context: Context) {
         private val ANIMATIONS_ENABLED_KEY = booleanPreferencesKey("animations_enabled")
         private val VIBRATION_ENABLED_KEY = booleanPreferencesKey("vibration_enabled")
         private val SELECTED_SHIP_SKIN_KEY = stringPreferencesKey("selected_ship_skin")
-        private val GRID_ASPECT_RATIO_KEY = floatPreferencesKey("grid_aspect_ratio")
 
         // Дефолтные значения
         private const val DEFAULT_NICKNAME = "Player"
@@ -52,7 +51,6 @@ class SettingsDataStore(private val context: Context) {
         private const val DEFAULT_ANIMATIONS_ENABLED = true
         private const val DEFAULT_VIBRATION_ENABLED = true
         private const val DEFAULT_SHIP_SKIN = "default"
-        private const val DEFAULT_GRID_ASPECT_RATIO = 0.8f
     }
     
     // ========================================
@@ -121,14 +119,6 @@ class SettingsDataStore(private val context: Context) {
     val selectedShipSkinFlow: Flow<String> = context.dataStore.data
         .map { preferences ->
             preferences[SELECTED_SHIP_SKIN_KEY] ?: DEFAULT_SHIP_SKIN
-        }
-
-    /**
-     * Flow с пропорциями игрового поля (aspect ratio)
-     */
-    val gridAspectRatioFlow: Flow<Float> = context.dataStore.data
-        .map { preferences ->
-            preferences[GRID_ASPECT_RATIO_KEY] ?: DEFAULT_GRID_ASPECT_RATIO
         }
 
     // ========================================
@@ -224,17 +214,6 @@ class SettingsDataStore(private val context: Context) {
     }
 
     /**
-     * Сохранение пропорций игрового поля (aspect ratio)
-     *
-     * @param ratio Значение пропорций (0.6 - 1.2)
-     */
-    suspend fun setGridAspectRatio(ratio: Float) {
-        context.dataStore.edit { preferences ->
-            preferences[GRID_ASPECT_RATIO_KEY] = ratio
-        }
-    }
-
-    /**
      * Сброс всех настроек к дефолтным значениям (кроме никнейма)
      */
     suspend fun resetToDefaults() {
@@ -266,8 +245,7 @@ class SettingsDataStore(private val context: Context) {
             soundEffectsEnabled = preferences[SOUND_EFFECTS_ENABLED_KEY] ?: DEFAULT_SOUND_EFFECTS_ENABLED,
             animationsEnabled = preferences[ANIMATIONS_ENABLED_KEY] ?: DEFAULT_ANIMATIONS_ENABLED,
             vibrationEnabled = preferences[VIBRATION_ENABLED_KEY] ?: DEFAULT_VIBRATION_ENABLED,
-            selectedShipSkin = preferences[SELECTED_SHIP_SKIN_KEY] ?: DEFAULT_SHIP_SKIN,
-            gridAspectRatio = preferences[GRID_ASPECT_RATIO_KEY] ?: DEFAULT_GRID_ASPECT_RATIO
+            selectedShipSkin = preferences[SELECTED_SHIP_SKIN_KEY] ?: DEFAULT_SHIP_SKIN
         )
     }
 }
@@ -285,6 +263,5 @@ data class SettingsSnapshot(
     val soundEffectsEnabled: Boolean,
     val animationsEnabled: Boolean,
     val vibrationEnabled: Boolean,
-    val selectedShipSkin: String,
-    val gridAspectRatio: Float
+    val selectedShipSkin: String
 )

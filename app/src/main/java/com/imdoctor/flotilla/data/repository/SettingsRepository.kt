@@ -52,7 +52,8 @@ class SettingsRepository(
     val animationsEnabledFlow: Flow<Boolean> = localDataStore.animationsEnabledFlow
     val vibrationEnabledFlow: Flow<Boolean> = localDataStore.vibrationEnabledFlow
     val selectedShipSkinFlow: Flow<String> = localDataStore.selectedShipSkinFlow
-    
+    val gridAspectRatioFlow: Flow<Float> = localDataStore.gridAspectRatioFlow
+
 
     // МЕТОДЫ для сохранения настроек
     /**
@@ -258,17 +259,32 @@ class SettingsRepository(
     suspend fun setSelectedShipSkin(skinId: String): Result<Unit> {
         return try {
             localDataStore.setSelectedShipSkin(skinId)
-            
+
             authManager.currentUserId?.let { userId ->
                 syncSettingsToFirebase(userId)
             }
-            
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
-    
+
+    /**
+     * Сохранение пропорций игрового поля (aspect ratio)
+     *
+     * ВАЖНО: Эта настройка хранится ТОЛЬКО локально и НЕ синхронизируется с Firebase
+     */
+    suspend fun setGridAspectRatio(ratio: Float): Result<Unit> {
+        return try {
+            localDataStore.setGridAspectRatio(ratio)
+            // НЕ синхронизируем с Firebase - только локально
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
 
     // СИНХРОНИЗАЦИЯ НАСТРОЕЧЕК С БД
 

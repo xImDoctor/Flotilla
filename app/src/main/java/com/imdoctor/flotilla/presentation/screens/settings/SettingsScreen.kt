@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -38,6 +39,7 @@ fun SettingsScreen(
     val soundEffectsEnabled by viewModel.soundEffectsEnabled.collectAsStateWithLifecycle()
     val animationsEnabled by viewModel.animationsEnabled.collectAsStateWithLifecycle()
     val vibrationEnabled by viewModel.vibrationEnabled.collectAsStateWithLifecycle()
+    val gridAspectRatio by viewModel.gridAspectRatio.collectAsStateWithLifecycle()
     val nicknameUpdateResult by viewModel.nicknameUpdateResult.collectAsStateWithLifecycle()
 
     // Локальное состояние для диалога Credits
@@ -158,7 +160,18 @@ fun SettingsScreen(
             )
             
             HorizontalDivider()
-            
+
+            // Пропорции игрового поля
+            SettingsSliderRow(
+                label = stringResource(R.string.settings_grid_aspect_ratio),
+                value = gridAspectRatio,
+                onValueChange = { viewModel.setGridAspectRatio(it) },
+                valueRange = 0.6f..1.2f,
+                steps = 11  // 0.6, 0.65, 0.7, ..., 1.15, 1.2 (12 values, 11 steps between)
+            )
+
+            HorizontalDivider()
+
             // Аудио и эффекты
             Text(
                 text = stringResource(R.string.settings_audio_effects_title),
@@ -382,4 +395,50 @@ private fun CreditsDialog(onDismiss: () -> Unit) {
             }
         }
     )
+}
+
+/**
+ * Строка настройки со слайдером
+ */
+@Composable
+private fun SettingsSliderRow(
+    label: String,
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
+    steps: Int,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Text(
+                text = String.format("%.2f", value),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = valueRange,
+            steps = steps,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 4.dp)
+        )
+    }
 }

@@ -113,7 +113,17 @@ class SettingsViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = true
         )
-    
+
+    /**
+     * Пропорции игрового поля (aspect ratio)
+     */
+    val gridAspectRatio: StateFlow<Float> = settingsRepository.gridAspectRatioFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = 0.8f
+        )
+
 
     // ДЕЙСТВИЯ
     
@@ -215,7 +225,7 @@ class SettingsViewModel(
     
     /**
      * Переключение вибрации
-     * 
+     *
      * @param enabled Включена ли вибрация
      */
     fun toggleVibration(enabled: Boolean) {
@@ -223,7 +233,18 @@ class SettingsViewModel(
             settingsRepository.setVibrationEnabled(enabled)
         }
     }
-    
+
+    /**
+     * Изменение пропорций игрового поля (aspect ratio)
+     *
+     * @param ratio Значение пропорций (0.6 - 1.2)
+     */
+    fun setGridAspectRatio(ratio: Float) {
+        viewModelScope.launch {
+            settingsRepository.setGridAspectRatio(ratio)
+        }
+    }
+
     /**
      * Сброс настроек к дефолтным значениям
      */

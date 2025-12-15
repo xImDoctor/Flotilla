@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.imdoctor.flotilla.R
+import com.imdoctor.flotilla.di.AppContainer
 import com.imdoctor.flotilla.presentation.theme.FlotillaColors
 import com.imdoctor.flotilla.utils.ShipPlacementValidator
 import kotlin.math.roundToInt
@@ -43,13 +44,9 @@ import kotlin.math.roundToInt
  */
 private object ShipSetupDimens {
     @Composable
-    fun gridAspectRatio(): Float {
-        val screenHeight = LocalConfiguration.current.screenHeightDp
-        return when {
-            screenHeight < 700 -> 0.80f  // Маленькие телефоны
-            screenHeight < 900 -> 0.85f  // Обычные телефоны
-            else -> 1.0f                 // Планшеты (квадрат)
-        }
+    fun gridAspectRatio(userPreference: Float): Float {
+        // Используем значение из настроек
+        return userPreference
     }
 
     @Composable
@@ -88,6 +85,10 @@ fun ShipSetupScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val showCoordinates by viewModel.showCoordinates.collectAsStateWithLifecycle()
     val animationsEnabled by viewModel.animationsEnabled.collectAsStateWithLifecycle()
+
+    // Настройка пропорций игровой сетки из настроек
+    val gridAspectRatio by AppContainer.settingsRepository.gridAspectRatioFlow
+        .collectAsState(initial = 0.8f)
 
     // Состояние перетаскивания
     var draggedShip by remember { mutableStateOf<ShipTemplate?>(null) }
@@ -181,7 +182,7 @@ fun ShipSetupScreen(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .aspectRatio(ShipSetupDimens.gridAspectRatio())
+                            .aspectRatio(ShipSetupDimens.gridAspectRatio(gridAspectRatio))
                     )
 
                     // Drag overlay - ТОЛЬКО над grid area
@@ -472,16 +473,8 @@ private fun GameGrid(
                         .fillMaxWidth()
                         .onGloballyPositioned { coordinates ->
                             val position = coordinates.positionInRoot()
-                            // Передаём позицию игровой зоны (без headers)
-                            val adjustedPosition = if (showCoordinates) {
-                                Offset(
-                                    position.x + headerSizePx,
-                                    position.y
-                                )
-                            } else {
-                                position
-                            }
-                            onPositionUpdate(adjustedPosition, cellSizePx)
+                            // НЕ корректируем position - он уже правильный из layout system
+                            onPositionUpdate(position, cellSizePx)
                         }
                 ) {
                     // Фон сетки

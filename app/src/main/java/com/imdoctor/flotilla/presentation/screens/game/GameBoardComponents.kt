@@ -8,13 +8,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.imdoctor.flotilla.R
 import com.imdoctor.flotilla.presentation.screens.game.models.Board
 import com.imdoctor.flotilla.presentation.screens.game.models.Cell
 import com.imdoctor.flotilla.presentation.screens.game.models.CellState
@@ -168,18 +174,21 @@ fun CellItem(
 }
 
 /**
- * Компактная информация об игре (никнейм противника, чей ход)
+ * Компактная информация об игре (противник vs игрок, чей ход)
  *
+ * @param playerNickname Никнейм игрока
  * @param opponentNickname Никнейм противника
  * @param isYourTurn Ваш ли сейчас ход
  */
 @Composable
 fun GameInfo(
+    playerNickname: String,
     opponentNickname: String,
-    isYourTurn: Boolean
+    isYourTurn: Boolean,
+    modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         colors = CardDefaults.cardColors(
             containerColor = if (isYourTurn) {
                 MaterialTheme.colorScheme.primaryContainer
@@ -192,23 +201,16 @@ fun GameInfo(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                text = "Противник: $opponentNickname",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = if (isYourTurn) "Ваш ход" else "Ход противника",
-                style = MaterialTheme.typography.bodyLarge,
-                color = if (isYourTurn) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-                fontWeight = FontWeight.SemiBold
+            AutoSizeText(
+                text = "$playerNickname ${stringResource(R.string.game_vs_separator)} $opponentNickname",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                maxLines = 1,
+                minTextSize = 10.sp,
+                maxTextSize = 18.sp,
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }
@@ -289,4 +291,41 @@ private fun formatDuration(seconds: Double): String {
     val minutes = (seconds / 60).toInt()
     val secs = (seconds % 60).toInt()
     return String.format("%d:%02d", minutes, secs)
+}
+
+/**
+ * Text с автоматическим уменьшением размера шрифта при переполнении
+ *
+ * Material3 не поддерживает auto-sizing нативно, поэтому реализуем вручную
+ */
+@Composable
+private fun AutoSizeText(
+    text: String,
+    style: TextStyle,
+    modifier: Modifier = Modifier,
+    maxLines: Int = 1,
+    minTextSize: TextUnit = 10.sp,
+    maxTextSize: TextUnit = style.fontSize
+) {
+    var textSize by remember { mutableStateOf(maxTextSize) }
+    var readyToDraw by remember { mutableStateOf(false) }
+
+    Text(
+        text = text,
+        style = style.copy(fontSize = textSize),
+        maxLines = maxLines,
+        overflow = TextOverflow.Visible,
+        softWrap = false,
+        modifier = modifier.drawWithContent {
+            if (readyToDraw) drawContent()
+        },
+        onTextLayout = { textLayoutResult ->
+            if (textLayoutResult.didOverflowWidth && textSize > minTextSize) {
+                // Уменьшаем шрифт на 1sp
+                textSize = (textSize.value - 1f).sp
+            } else {
+                readyToDraw = true
+            }
+        }
+    )
 }

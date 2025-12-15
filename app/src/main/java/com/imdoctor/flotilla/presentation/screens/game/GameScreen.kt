@@ -1,5 +1,6 @@
 package com.imdoctor.flotilla.presentation.screens.game
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -8,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -247,23 +249,32 @@ private fun OnlineGameScaffold(
 ) {
     var showExitDialog by remember { mutableStateOf(false) }
 
+    // Перехват системной кнопки "Назад"
+    BackHandler(enabled = true) {
+        if (gameState?.gameOver == false) {
+            showExitDialog = true  // Показать диалог
+        } else {
+            onExitGame()  // Выйти сразу если игра завершена
+        }
+    }
+
     // Диалог подтверждения выхода
     if (showExitDialog) {
         AlertDialog(
             onDismissRequest = { showExitDialog = false },
-            title = { Text("Выйти из игры?") },
-            text = { Text("Текущая игра будет потеряна. Вы уверены?") },
+            title = { Text(stringResource(R.string.game_exit_dialog_title)) },
+            text = { Text(stringResource(R.string.game_exit_dialog_message)) },
             confirmButton = {
                 TextButton(onClick = {
                     showExitDialog = false
                     onExitGame()
                 }) {
-                    Text("Выйти", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.game_exit_confirm), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showExitDialog = false }) {
-                    Text("Отмена")
+                    Text(stringResource(R.string.game_exit_cancel))
                 }
             }
         )
@@ -332,53 +343,63 @@ private fun GameContent(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // Информация об игре
+        // GameInfo с opponent info
+        val playerNick = "Player"  // TODO: Получить из UserRepository
+        val opponentNick = gameState.opponentNickname
+
         GameInfo(
-            opponentNickname = gameState.opponentNickname,
+            playerNickname = playerNick,
+            opponentNickname = opponentNick,
             isYourTurn = gameState.isMyTurn
         )
 
-        // Статус игры
-        when (uiState) {
-            is OnlineGameViewModel.GameUiState.YourTurn -> {
-                Text(
-                    text = "Ваш ход - выберите клетку для атаки",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-            is OnlineGameViewModel.GameUiState.OpponentTurn -> {
-                Text(
-                    text = "Ход противника...",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            is OnlineGameViewModel.GameUiState.WaitingForResult -> {
-                CircularProgressIndicator(modifier = Modifier.size(24.dp))
-            }
-            is OnlineGameViewModel.GameUiState.OpponentDisconnected -> {
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    )
-                ) {
+        // Индикатор хода (под GameInfo, по центру)
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            when (uiState) {
+                is OnlineGameViewModel.GameUiState.YourTurn -> {
                     Text(
-                        text = "Противник отключился",
-                        modifier = Modifier.padding(16.dp),
-                        color = MaterialTheme.colorScheme.onErrorContainer
+                        text = stringResource(R.string.game_your_turn_instruction),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center
                     )
                 }
+                is OnlineGameViewModel.GameUiState.OpponentTurn -> {
+                    Text(
+                        text = stringResource(R.string.game_opponent_turn),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                is OnlineGameViewModel.GameUiState.WaitingForResult -> {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                }
+                is OnlineGameViewModel.GameUiState.OpponentDisconnected -> {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        )
+                    ) {
+                        Text(
+                            text = "Противник отключился",
+                            modifier = Modifier.padding(16.dp),
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                }
+                else -> {}
             }
-            else -> {}
         }
 
         // Поле противника (для атак)
         Text(
-            text = "Поле противника",
+            text = stringResource(R.string.game_opponent_board),
             style = MaterialTheme.typography.titleMedium
         )
         GameBoardGrid(
@@ -392,7 +413,7 @@ private fun GameContent(
 
         // Моё поле (с кораблями)
         Text(
-            text = "Ваше поле",
+            text = stringResource(R.string.game_your_board),
             style = MaterialTheme.typography.titleMedium
         )
         GameBoardGrid(

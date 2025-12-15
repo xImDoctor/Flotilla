@@ -36,6 +36,22 @@
     <string name="game_enemy_grid_placeholder">Вражеская сетка\n(В будущих обновлениях…)</string>
     <string name="game_player_grid_placeholder">Ваша сетка\n(В будущих обновлениях…)</string>
     <string name="game_end_debug_button">Завершить игру (Debug)</string>
+    <string name="game_vs_separator">vs.</string>
+    <string name="game_opponent_board">Поле противника</string>
+    <string name="game_your_board">Ваше поле</string>
+    <string name="game_your_turn_instruction">Ваш ход - выберите клетку для атаки</string>
+    <string name="game_ai_turn">Ход ИИ...</string>
+    <string name="game_opponent_turn">Ход противника</string>
+
+    <!-- AI Difficulty -->
+    <string name="ai_difficulty_easy">easy</string>
+    <string name="ai_difficulty_hard">hard</string>
+
+    <!-- Exit Dialog -->
+    <string name="game_exit_dialog_title">Выйти из игры?</string>
+    <string name="game_exit_dialog_message">Текущая игра будет потеряна. Вы уверены?</string>
+    <string name="game_exit_confirm">Выйти</string>
+    <string name="game_exit_cancel">Отмена</string>
 
     <!-- Find Opponent Screen -->
     <string name="find_opponent_title">Найти соперника</string>
@@ -61,6 +77,7 @@
     <string name="settings_nickname_error_network">Ошибка сети. Проверьте подключение</string>
     <string name="settings_grid_title">Настройки сетки</string>
     <string name="settings_show_coordinates">Показывать координаты</string>
+    <string name="settings_grid_aspect_ratio">Пропорции игрового поля</string>
     <string name="settings_audio_effects_title">Аудио и эффекты</string>
     <string name="settings_background_music">Фоновая музыка</string>
     <string name="settings_music_track_title">Фоновый трек</string>

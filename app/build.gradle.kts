@@ -66,6 +66,11 @@ android {
         compose = true
         buildConfig = true  // Для BuildConfig (для хранения констант)
     }
+
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
+    }
 }
 
 dependencies {

@@ -75,6 +75,10 @@ class OnlineGameViewModel(
                 // Инициализировать игровое состояние
                 initializeGameState()
 
+                // Отключиться от matchmaking WebSocket перед подключением к game
+                Logger.i(TAG, "Disconnecting from matchmaking before connecting to game")
+                webSocketManager.disconnectMatchmaking()
+
                 // Подключиться к игровому WebSocket
                 webSocketManager.connectToGame(gameId, token)
                     .collect { event ->

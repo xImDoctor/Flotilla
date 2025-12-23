@@ -49,8 +49,11 @@ fun FindOpponentScreen(
     // Гарантированная очистка при выходе из экрана
     DisposableEffect(Unit) {
         onDispose {
-            // Отменить поиск и отключиться от WebSocket при уничтожении экрана
-            viewModel.cancelMatchmaking()
+            // Отменить поиск только если матч НЕ найден
+            // Если матч найден, WebSocket нужен для перехода к игре
+            if (uiState !is MatchmakingViewModel.MatchmakingUiState.MatchFound) {
+                viewModel.cancelMatchmaking()
+            }
         }
     }
 

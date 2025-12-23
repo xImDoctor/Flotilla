@@ -44,6 +44,14 @@ fun FindOpponentScreen(
         }
     }
 
+    // Гарантированная очистка при выходе из экрана
+    DisposableEffect(Unit) {
+        onDispose {
+            // Отменить поиск и отключиться от WebSocket при уничтожении экрана
+            viewModel.cancelMatchmaking()
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(

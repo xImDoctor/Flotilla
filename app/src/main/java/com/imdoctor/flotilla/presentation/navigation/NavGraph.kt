@@ -152,7 +152,14 @@ fun FlotillaNavGraph(navController: NavHostController, startDestination: String 
             FindOpponentScreen(
                 onOpponentFound = { gameId ->
                     if (NavigationValidator.isValidGameId(gameId)) {
-                        navController.navigate(Screen.ShipSetup.createRoute("vs_player"))
+                        // Переход напрямую к Game экрану с режимом "online"
+                        navController.navigate(Screen.Game.createRoute(gameId, "online")) {
+                            // Очистить стек до главного меню
+                            popUpTo(Screen.MainMenu.route) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                        }
                     }
                 },
                 onCancel = { navController.popBackStack() }

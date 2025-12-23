@@ -151,7 +151,9 @@ fun FlotillaNavGraph(navController: NavHostController, startDestination: String 
         composable(Screen.FindOpponent.route) {
             FindOpponentScreen(
                 onOpponentFound = { gameId ->
+                    android.util.Log.i("NavGraph", "Match found callback triggered with gameId: $gameId")
                     if (NavigationValidator.isValidGameId(gameId)) {
+                        android.util.Log.i("NavGraph", "GameId validated successfully, navigating to game screen")
                         // Переход напрямую к Game экрану с режимом "online"
                         navController.navigate(Screen.Game.createRoute(gameId, "online")) {
                             // Очистить стек до главного меню
@@ -160,6 +162,8 @@ fun FlotillaNavGraph(navController: NavHostController, startDestination: String 
                             }
                             launchSingleTop = true
                         }
+                    } else {
+                        android.util.Log.e("NavGraph", "GameId validation FAILED for: $gameId")
                     }
                 },
                 onCancel = { navController.popBackStack() }

@@ -291,7 +291,12 @@ fun ShipSetupScreen(
                                 )
                             }
 
-                            // Переход к игре
+                            // Для online режима сохраняем корабли для матчмейкинга
+                            if (gameMode == "online") {
+                                com.imdoctor.flotilla.data.repository.MatchmakingDataHolder.savePreparedShips(ships)
+                            }
+
+                            // Переход к игре или матчмейкингу
                             onSetupComplete(gameId)
                         }
                     },

@@ -38,9 +38,22 @@ fun FindOpponentScreen(
 
     // Обрабатываем найденный матч
     LaunchedEffect(uiState) {
+        android.util.Log.d("FindOpponentScreen", "LaunchedEffect triggered, state: ${uiState::class.simpleName}")
         if (uiState is MatchmakingViewModel.MatchmakingUiState.MatchFound) {
             val matchFound = uiState as MatchmakingViewModel.MatchmakingUiState.MatchFound
+            android.util.Log.i("FindOpponentScreen", "Match found! Calling onOpponentFound with gameId: ${matchFound.gameId}")
             onOpponentFound(matchFound.gameId)
+        }
+    }
+
+    // Гарантированная очистка при выходе из экрана
+    DisposableEffect(Unit) {
+        onDispose {
+            // Отменить поиск только если матч НЕ найден
+            // Если матч найден, WebSocket нужен для перехода к игре
+            if (uiState !is MatchmakingViewModel.MatchmakingUiState.MatchFound) {
+                viewModel.cancelMatchmaking()
+            }
         }
     }
 

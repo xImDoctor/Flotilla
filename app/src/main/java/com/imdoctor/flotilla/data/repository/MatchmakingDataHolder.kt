@@ -11,6 +11,21 @@ import com.imdoctor.flotilla.data.remote.websocket.models.ShipPlacement
 object MatchmakingDataHolder {
 
     private var cachedData: MatchmakingData? = null
+    private var preparedShips: List<ShipPlacement>? = null
+
+    /**
+     * Сохранить подготовленные корабли перед матчмейкингом
+     */
+    fun savePreparedShips(ships: List<ShipPlacement>) {
+        preparedShips = ships
+    }
+
+    /**
+     * Получить подготовленные корабли
+     */
+    fun getPreparedShips(): List<ShipPlacement>? {
+        return preparedShips
+    }
 
     /**
      * Сохранить данные matchmaking

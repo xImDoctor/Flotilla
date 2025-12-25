@@ -45,7 +45,8 @@ sealed class Screen(val route: String) {
 object NavigationValidator {
 
     private val GAME_MODE_REGEX = Regex("^(online|ai_easy|ai_hard)$")
-    private val GAME_ID_REGEX = Regex("^[a-zA-Z0-9_-]{3,32}$")
+    // Поддержка UUID формата (36 символов) и других game_id
+    private val GAME_ID_REGEX = Regex("^[a-zA-Z0-9_-]{3,64}$")
 
     fun isValidGameMode(mode: String?): Boolean = mode?.matches(GAME_MODE_REGEX) == true
 
@@ -56,7 +57,7 @@ object NavigationValidator {
      */
     fun sanitizeString(input: String?): String {
         return input?.filter { it.isLetterOrDigit() || it == '_' || it == '-' }
-            ?.take(32) // макс. 32 символа
+            ?.take(64) // макс. 64 символа (поддержка UUID)
             ?: ""
     }
 }

@@ -51,7 +51,8 @@ fun FlotillaNavGraph(navController: NavHostController, startDestination: String 
                 },
 
                 onFindOpponent = {
-                    navController.navigate(Screen.FindOpponent.route)
+                    // Сначала идём к расстановке кораблей для онлайн режима
+                    navController.navigate(Screen.ShipSetup.createRoute("online"))
                 },
 
                 onStatistics = {
@@ -87,13 +88,19 @@ fun FlotillaNavGraph(navController: NavHostController, startDestination: String 
                 ShipSetupScreen(
                     gameMode = gameMode!!,
                     onSetupComplete = { gameId ->
-
-                        // Переход к игре с валидированным ID и режимом игры
-                        if (NavigationValidator.isValidGameId(gameId)) {
-                            navController.navigate(Screen.Game.createRoute(gameId, gameMode)) {
-
-                                // Очистка back stack для предотвращения возврата к setup
+                        // Для онлайн режима переходим к матчмейкингу
+                        if (gameMode == "online") {
+                            navController.navigate(Screen.FindOpponent.route) {
+                                // Очистка back stack
                                 popUpTo(Screen.MainMenu.route)
+                            }
+                        } else {
+                            // Для AI режима переходим сразу к игре
+                            if (NavigationValidator.isValidGameId(gameId)) {
+                                navController.navigate(Screen.Game.createRoute(gameId, gameMode)) {
+                                    // Очистка back stack для предотвращения возврата к setup
+                                    popUpTo(Screen.MainMenu.route)
+                                }
                             }
                         }
                     },
@@ -151,8 +158,19 @@ fun FlotillaNavGraph(navController: NavHostController, startDestination: String 
         composable(Screen.FindOpponent.route) {
             FindOpponentScreen(
                 onOpponentFound = { gameId ->
+                    android.util.Log.i("NavGraph", "Match found callback triggered with gameId: $gameId")
                     if (NavigationValidator.isValidGameId(gameId)) {
-                        navController.navigate(Screen.ShipSetup.createRoute("vs_player"))
+                        android.util.Log.i("NavGraph", "GameId validated successfully, navigating to game screen")
+                        // Переход напрямую к Game экрану с режимом "online"
+                        navController.navigate(Screen.Game.createRoute(gameId, "online")) {
+                            // Очистить стек до главного меню
+                            popUpTo(Screen.MainMenu.route) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                        }
+                    } else {
+                        android.util.Log.e("NavGraph", "GameId validation FAILED for: $gameId")
                     }
                 },
                 onCancel = { navController.popBackStack() }

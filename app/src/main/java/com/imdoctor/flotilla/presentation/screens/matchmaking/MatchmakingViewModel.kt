@@ -60,13 +60,13 @@ class MatchmakingViewModel(
                 val profile = userRepository.getCurrentUserProfile()
                 val nickname = profile?.nickname ?: "Player"
 
-                // Подготовить корабли
-                val shipPlacements = if (ships.isEmpty()) {
-                    createMockShips()
-                } else {
-                    ships
-                }
+                // Подготовить корабли: сначала из DataHolder, потом из параметра, или mock
+                val shipPlacements = MatchmakingDataHolder.getPreparedShips()
+                    ?: if (ships.isNotEmpty()) ships else createMockShips()
+
                 sentShips = shipPlacements
+
+                Logger.i(TAG, "Using ships for matchmaking: ${shipPlacements.size} ships")
 
                 // Подключиться к matchmaking WebSocket с callback
                 webSocketManager.connectToMatchmaking(

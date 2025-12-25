@@ -175,10 +175,17 @@ class OnlineGameViewModel(
      */
     fun makeMove(x: Int, y: Int) {
         val currentState = _gameState.value ?: return
+        val currentUiState = _uiState.value
 
         // Проверить, что сейчас наш ход
         if (!currentState.isMyTurn) {
             Logger.w(TAG, "Attempted to make move but it's not your turn")
+            return
+        }
+
+        // Проверить, что не ждём результата предыдущего хода
+        if (currentUiState is GameUiState.WaitingForResult) {
+            Logger.w(TAG, "Already waiting for previous move result")
             return
         }
 
@@ -289,11 +296,32 @@ class OnlineGameViewModel(
                 else -> currentState.opponentBoard
             }
 
-            _gameState.value = currentState.copy(opponentBoard = newOpponentBoard)
+            // Обновляем состояние игры
+            val updatedState = when (data.result) {
+                MoveResult.MISS -> {
+                    // При промахе ход переходит к противнику
+                    currentState.copy(
+                        opponentBoard = newOpponentBoard,
+                        isMyTurn = false
+                    )
+                }
+                MoveResult.HIT, MoveResult.SUNK -> {
+                    // При попадании ход остаётся у нас, но дождёмся подтверждения YOUR_TURN от сервера
+                    currentState.copy(opponentBoard = newOpponentBoard)
+                }
+                else -> currentState.copy(opponentBoard = newOpponentBoard)
+            }
 
-            // Если игра не закончена, ждём хода противника
+            _gameState.value = updatedState
+
+            // Если игра не закончена
             if (!data.gameOver) {
-                _uiState.value = GameUiState.OpponentTurn
+                // При промахе ход переходит к противнику
+                if (data.result == MoveResult.MISS) {
+                    _uiState.value = GameUiState.OpponentTurn
+                }
+                // При попадании (HIT/SUNK) ход остаётся у нас - дождёмся события YOUR_TURN от сервера
+                // Не меняем uiState, т.к. сервер отправит YOUR_TURN нам же
             }
 
         } catch (e: Exception) {

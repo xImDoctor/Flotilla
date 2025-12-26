@@ -166,6 +166,7 @@ private fun AIGameScreen(
     // Определить сложность
     val difficulty = when (gameMode) {
         "ai_easy" -> AIDifficulty.EASY
+        "ai_medium" -> AIDifficulty.MEDIUM
         "ai_hard" -> AIDifficulty.HARD
         else -> AIDifficulty.EASY
     }

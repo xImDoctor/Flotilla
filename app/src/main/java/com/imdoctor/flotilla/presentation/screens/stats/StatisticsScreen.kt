@@ -35,6 +35,8 @@ fun StatisticsScreen(
     // AI статистика
     val easyWins by viewModel.easyWins.collectAsStateWithLifecycle()
     val easyLosses by viewModel.easyLosses.collectAsStateWithLifecycle()
+    val mediumWins by viewModel.mediumWins.collectAsStateWithLifecycle()
+    val mediumLosses by viewModel.mediumLosses.collectAsStateWithLifecycle()
     val hardWins by viewModel.hardWins.collectAsStateWithLifecycle()
     val hardLosses by viewModel.hardLosses.collectAsStateWithLifecycle()
     
@@ -60,6 +62,8 @@ fun StatisticsScreen(
                     profile = state.profile,
                     easyWins = easyWins,
                     easyLosses = easyLosses,
+                    mediumWins = mediumWins,
+                    mediumLosses = mediumLosses,
                     hardWins = hardWins,
                     hardLosses = hardLosses,
                     modifier = Modifier.padding(padding)
@@ -102,6 +106,8 @@ private fun StatisticsContent(
     profile: com.imdoctor.flotilla.data.remote.firebase.models.UserProfile,
     easyWins: Int,
     easyLosses: Int,
+    mediumWins: Int,
+    mediumLosses: Int,
     hardWins: Int,
     hardLosses: Int,
     modifier: Modifier = Modifier
@@ -191,149 +197,73 @@ private fun StatisticsContent(
             thickness = 2.dp
         )
 
-        // AI статистика
+        // AI статистика (объединённая таблица)
         Text(
             text = "Игры против ИИ",
             style = MaterialTheme.typography.titleLarge
         )
 
-        // Лёгкий режим
-        Card(
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Card(modifier = Modifier.fillMaxWidth()) {
             Column(
                 modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(
-                    text = "Лёгкий уровень",
-                    style = MaterialTheme.typography.titleMedium
-                )
-
+                // Заголовки таблицы
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Column(
+                    Text(
+                        text = "Уровень",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.weight(1.2f)
+                    )
+                    Text(
+                        text = "Побед",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "Побед",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = easyWins.toString(),
-                            style = MaterialTheme.typography.headlineMedium
-                        )
-                    }
-
-                    Column(
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "Поражений",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "Поражений",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = easyLosses.toString(),
-                            style = MaterialTheme.typography.headlineMedium
-                        )
-                    }
-
-                    Column(
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "Винрейт",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "Винрейт",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        val easyWinRate = if (easyWins + easyLosses > 0) {
-                            (easyWins.toFloat() / (easyWins + easyLosses) * 100).roundToInt()
-                        } else {
-                            0
-                        }
-                        Text(
-                            text = "$easyWinRate%",
-                            style = MaterialTheme.typography.headlineMedium
-                        )
-                    }
+                        textAlign = TextAlign.Center
+                    )
                 }
-            }
-        }
 
-        // Сложный режим
-        Card(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = "Сложный уровень",
-                    style = MaterialTheme.typography.titleMedium
+                HorizontalDivider()
+
+                // Строка: Лёгкий
+                AIStatsRow(
+                    difficulty = stringResource(R.string.ai_difficulty_easy),
+                    wins = easyWins,
+                    losses = easyLosses
                 )
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "Побед",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = hardWins.toString(),
-                            style = MaterialTheme.typography.headlineMedium
-                        )
-                    }
+                // Строка: Средний
+                AIStatsRow(
+                    difficulty = stringResource(R.string.ai_difficulty_medium),
+                    wins = mediumWins,
+                    losses = mediumLosses
+                )
 
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "Поражений",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = hardLosses.toString(),
-                            style = MaterialTheme.typography.headlineMedium
-                        )
-                    }
-
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "Винрейт",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        val hardWinRate = if (hardWins + hardLosses > 0) {
-                            (hardWins.toFloat() / (hardWins + hardLosses) * 100).roundToInt()
-                        } else {
-                            0
-                        }
-                        Text(
-                            text = "$hardWinRate%",
-                            style = MaterialTheme.typography.headlineMedium
-                        )
-                    }
-                }
+                // Строка: Сложный
+                AIStatsRow(
+                    difficulty = stringResource(R.string.ai_difficulty_hard),
+                    wins = hardWins,
+                    losses = hardLosses
+                )
             }
         }
     }
@@ -446,6 +376,57 @@ private fun DetailRow(
         Text(
             text = value,
             style = MaterialTheme.typography.bodyMedium
+        )
+    }
+}
+
+/**
+ * Строка таблицы AI статистики
+ */
+@Composable
+private fun AIStatsRow(
+    difficulty: String,
+    wins: Int,
+    losses: Int
+) {
+    val winRate = if (wins + losses > 0) {
+        (wins.toFloat() / (wins + losses) * 100).roundToInt()
+    } else {
+        0
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = difficulty,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1.2f)
+        )
+        Text(
+            text = wins.toString(),
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f),
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = losses.toString(),
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f),
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = "$winRate%",
+            style = MaterialTheme.typography.bodyLarge,
+            color = when {
+                winRate >= 60 -> MaterialTheme.colorScheme.primary
+                winRate >= 40 -> MaterialTheme.colorScheme.onSurface
+                else -> MaterialTheme.colorScheme.error
+            },
+            modifier = Modifier.weight(1f),
+            textAlign = TextAlign.Center
         )
     }
 }

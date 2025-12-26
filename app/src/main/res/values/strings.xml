@@ -44,8 +44,9 @@
     <string name="game_opponent_turn">Ход противника</string>
 
     <!-- AI Difficulty -->
-    <string name="ai_difficulty_easy">easy</string>
-    <string name="ai_difficulty_hard">hard</string>
+    <string name="ai_difficulty_easy">Easy</string>
+    <string name="ai_difficulty_medium">Medium</string>
+    <string name="ai_difficulty_hard">Hard</string>
 
     <!-- Exit Dialog -->
     <string name="game_exit_dialog_title">Выйти из игры?</string>

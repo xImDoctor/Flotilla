@@ -5,26 +5,26 @@ import com.imdoctor.flotilla.presentation.screens.game.models.CellState
 import com.imdoctor.flotilla.utils.Logger
 import kotlin.random.Random
 
-private const val TAG = "HardAI"
+private const val TAG = "MediumAI"
 
 /**
- * Сложный AI противник
+ * Средний AI противник
  *
- * Стратегия:
- * - "Читерский" AI с 70% вероятностью выстрела по кораблю (если видит корабль)
- * - После попадания гарантированно добивает корабль
- * - Использует умную стратегию добивания как у EasyAI
- * - Предоставляет серьёзный вызов даже для опытных игроков
+ * Стратегия: Parity Targeting (шахматная доска)
+ * - При поиске кораблей стреляет только по клеткам в шахматном порядке
+ * - Гарантирует попадание в любой корабль (т.к. корабль 2+ клеток обязательно попадёт на "шахматную" клетку)
+ * - С 10% вероятностью пропускает parity паттерн для добавления случайности
+ * - После попадания использует умную логику добивания как у EasyAI
+ * - Честная стратегия без читерства, но эффективнее случайных выстрелов
  *
- * ВАЖНО: Этот AI "видит" корабли игрока (проверяет CellState.SHIP),
- * что делает его значительно сильнее. Но благодаря 30% случайности,
- * игрок всё ещё может победить с хорошей стратегией.
+ * Эффективность: ~50% выстрелов тратится на поиск (против 100% у EasyAI),
+ * но гарантированно попадает во все корабли.
  */
-class HardAI : AIOpponent {
+class MediumAI : AIOpponent {
 
     companion object {
-        /** Вероятность выстрела по кораблю (если видим корабль) */
-        private const val CHEAT_PROBABILITY = 0.4f
+        /** Вероятность пропуска parity паттерна (добавление случайности) */
+        private const val RANDOMNESS_PROBABILITY = 0.1f  // 10%
     }
 
     // История попаданий (координаты клеток, куда попали)
@@ -63,17 +63,14 @@ class HardAI : AIOpponent {
             }
         }
 
-        // Иначе используем "чит" с вероятностью 70%
-        if (Random.nextFloat() < CHEAT_PROBABILITY) {
-            val shipCell = findShipCell(opponentBoard)
-            if (shipCell != null) {
-                Logger.d(TAG, "Cheating: targeting ship at $shipCell")
-                return shipCell
-            }
+        // С вероятностью 10% игнорировать parity паттерн
+        if (Random.nextFloat() < RANDOMNESS_PROBABILITY) {
+            Logger.d(TAG, "Random shot (10% chance)")
+            return getRandomMove(opponentBoard)
         }
 
-        // Если чит не сработал или кораблей не видно, стреляем случайно
-        return getRandomMove(opponentBoard)
+        // Иначе используем parity targeting (шахматная доска)
+        return getParityMove(opponentBoard)
     }
 
     override fun notifyMoveResult(x: Int, y: Int, hit: Boolean, sunk: Boolean) {
@@ -104,28 +101,43 @@ class HardAI : AIOpponent {
     }
 
     /**
-     * Найти клетку с кораблём (чит)
-     * Только неатакованные корабли
+     * Проверить, является ли клетка "шахматной"
+     *
+     * Клетки с (x + y) % 2 == 0 образуют шахматный паттерн,
+     * покрывающий половину доски и гарантирующий попадание в любой корабль длиной ≥2
      */
-    private fun findShipCell(opponentBoard: Board): Pair<Int, Int>? {
-        val shipCells = mutableListOf<Pair<Int, Int>>()
+    private fun isParityCell(x: Int, y: Int): Boolean {
+        return (x + y) % 2 == 0
+    }
+
+    /**
+     * Получить ход по стратегии parity targeting
+     */
+    private fun getParityMove(opponentBoard: Board): Pair<Int, Int> {
+        val availableParityCells = mutableListOf<Pair<Int, Int>>()
 
         for (x in 0..9) {
             for (y in 0..9) {
-                if (isCellAvailableForAttack(x, y, opponentBoard)) {
-                    val cell = opponentBoard.getCell(x, y)
-                    if (cell?.state == CellState.SHIP) {
-                        shipCells.add(Pair(x, y))
-                    }
+                if (isCellAvailableForAttack(x, y, opponentBoard) && isParityCell(x, y)) {
+                    availableParityCells.add(Pair(x, y))
                 }
             }
         }
 
-        return shipCells.randomOrNull()
+        // Если нет доступных parity клеток (теоретически не должно случиться),
+        // возвращаемся к случайной стратегии
+        if (availableParityCells.isEmpty()) {
+            Logger.w(TAG, "No parity cells available, falling back to random")
+            return getRandomMove(opponentBoard)
+        }
+
+        val randomParityCell = availableParityCells.random()
+        Logger.d(TAG, "Parity move: $randomParityCell (${availableParityCells.size} parity cells available)")
+        return randomParityCell
     }
 
     /**
-     * Найти цель вокруг попаданий
+     * Найти цель вокруг попаданий (идентично EasyAI)
      */
     private fun findTargetAroundHits(opponentBoard: Board): Pair<Int, Int>? {
         // Если есть 2+ попадания, попробовать определить направление
@@ -222,7 +234,7 @@ class HardAI : AIOpponent {
     }
 
     /**
-     * Получить случайный ход
+     * Получить случайный ход (fallback)
      */
     private fun getRandomMove(opponentBoard: Board): Pair<Int, Int> {
         val availableCells = mutableListOf<Pair<Int, Int>>()
@@ -236,7 +248,6 @@ class HardAI : AIOpponent {
         }
 
         if (availableCells.isEmpty()) {
-            // Не должно случиться, но на всякий случай
             Logger.e(TAG, "No available cells!")
             return Pair(0, 0)
         }

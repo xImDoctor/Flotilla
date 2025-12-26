@@ -44,7 +44,7 @@ sealed class Screen(val route: String) {
  */
 object NavigationValidator {
 
-    private val GAME_MODE_REGEX = Regex("^(online|ai_easy|ai_hard)$")
+    private val GAME_MODE_REGEX = Regex("^(online|ai_easy|ai_medium|ai_hard)$")
     // Поддержка UUID формата (36 символов) и других game_id
     private val GAME_ID_REGEX = Regex("^[a-zA-Z0-9_-]{3,64}$")
 

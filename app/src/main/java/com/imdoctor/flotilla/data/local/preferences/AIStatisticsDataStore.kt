@@ -26,6 +26,10 @@ class AIStatisticsDataStore(private val context: Context) {
         private val EASY_WINS_KEY = intPreferencesKey("ai_easy_wins")
         private val EASY_LOSSES_KEY = intPreferencesKey("ai_easy_losses")
 
+        // Ключи для статистики среднего уровня
+        private val MEDIUM_WINS_KEY = intPreferencesKey("ai_medium_wins")
+        private val MEDIUM_LOSSES_KEY = intPreferencesKey("ai_medium_losses")
+
         // Ключи для статистики сложного уровня
         private val HARD_WINS_KEY = intPreferencesKey("ai_hard_wins")
         private val HARD_LOSSES_KEY = intPreferencesKey("ai_hard_losses")
@@ -43,6 +47,20 @@ class AIStatisticsDataStore(private val context: Context) {
      */
     val easyLossesFlow: Flow<Int> = context.aiStatsDataStore.data.map { preferences ->
         preferences[EASY_LOSSES_KEY] ?: 0
+    }
+
+    /**
+     * Количество побед против среднего AI
+     */
+    val mediumWinsFlow: Flow<Int> = context.aiStatsDataStore.data.map { preferences ->
+        preferences[MEDIUM_WINS_KEY] ?: 0
+    }
+
+    /**
+     * Количество поражений от среднего AI
+     */
+    val mediumLossesFlow: Flow<Int> = context.aiStatsDataStore.data.map { preferences ->
+        preferences[MEDIUM_LOSSES_KEY] ?: 0
     }
 
     /**
@@ -68,6 +86,7 @@ class AIStatisticsDataStore(private val context: Context) {
         context.aiStatsDataStore.edit { preferences ->
             val key = when (difficulty) {
                 AIDifficulty.EASY -> EASY_WINS_KEY
+                AIDifficulty.MEDIUM -> MEDIUM_WINS_KEY
                 AIDifficulty.HARD -> HARD_WINS_KEY
             }
             val currentWins = preferences[key] ?: 0
@@ -84,6 +103,7 @@ class AIStatisticsDataStore(private val context: Context) {
         context.aiStatsDataStore.edit { preferences ->
             val key = when (difficulty) {
                 AIDifficulty.EASY -> EASY_LOSSES_KEY
+                AIDifficulty.MEDIUM -> MEDIUM_LOSSES_KEY
                 AIDifficulty.HARD -> HARD_LOSSES_KEY
             }
             val currentLosses = preferences[key] ?: 0
@@ -102,6 +122,11 @@ class AIStatisticsDataStore(private val context: Context) {
             AIDifficulty.EASY -> context.aiStatsDataStore.data.map { preferences ->
                 val wins = preferences[EASY_WINS_KEY] ?: 0
                 val losses = preferences[EASY_LOSSES_KEY] ?: 0
+                Pair(wins, losses)
+            }
+            AIDifficulty.MEDIUM -> context.aiStatsDataStore.data.map { preferences ->
+                val wins = preferences[MEDIUM_WINS_KEY] ?: 0
+                val losses = preferences[MEDIUM_LOSSES_KEY] ?: 0
                 Pair(wins, losses)
             }
             AIDifficulty.HARD -> context.aiStatsDataStore.data.map { preferences ->

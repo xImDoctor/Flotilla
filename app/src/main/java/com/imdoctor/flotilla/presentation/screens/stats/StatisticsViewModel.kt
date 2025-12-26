@@ -38,6 +38,12 @@ class StatisticsViewModel(
     val easyLosses: StateFlow<Int> = aiStatistics.easyLossesFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
+    val mediumWins: StateFlow<Int> = aiStatistics.mediumWinsFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val mediumLosses: StateFlow<Int> = aiStatistics.mediumLossesFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
     val hardWins: StateFlow<Int> = aiStatistics.hardWinsFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 

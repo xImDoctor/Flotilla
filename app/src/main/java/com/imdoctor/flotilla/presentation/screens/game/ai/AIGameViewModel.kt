@@ -37,6 +37,7 @@ class AIGameViewModel(
 
     private val aiOpponent: AIOpponent = when (difficulty) {
         AIDifficulty.EASY -> EasyAI()
+        AIDifficulty.MEDIUM -> MediumAI()
         AIDifficulty.HARD -> HardAI()
     }
 
@@ -89,6 +90,7 @@ class AIGameViewModel(
                     gameId = "ai_${System.currentTimeMillis()}",
                     opponentNickname = when (difficulty) {
                         AIDifficulty.EASY -> "AI (Лёгкий)"
+                        AIDifficulty.MEDIUM -> "AI (Средний)"
                         AIDifficulty.HARD -> "AI (Сложный)"
                     },
                     myBoard = playerBoard,

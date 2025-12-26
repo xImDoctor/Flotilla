@@ -54,13 +54,19 @@ fun MainMenuScreen(onNewGame: (String) -> Unit, onFindOpponent: () -> Unit, onSt
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             MenuButton(
-                text = "Лёгкий",
+                text = stringResource(R.string.ai_difficulty_easy),
                 onClick = { onNewGame("ai_easy") },
                 modifier = Modifier.weight(1f)
             )
 
             MenuButton(
-                text = "Сложный",
+                text = stringResource(R.string.ai_difficulty_medium),
+                onClick = { onNewGame("ai_medium") },
+                modifier = Modifier.weight(1f)
+            )
+
+            MenuButton(
+                text = stringResource(R.string.ai_difficulty_hard),
                 onClick = { onNewGame("ai_hard") },
                 modifier = Modifier.weight(1f)
             )

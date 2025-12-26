@@ -41,6 +41,7 @@ class SettingsDataStore(private val context: Context) {
         private val ANIMATIONS_ENABLED_KEY = booleanPreferencesKey("animations_enabled")
         private val VIBRATION_ENABLED_KEY = booleanPreferencesKey("vibration_enabled")
         private val SELECTED_SHIP_SKIN_KEY = stringPreferencesKey("selected_ship_skin")
+        private val LANGUAGE_KEY = stringPreferencesKey("language")
 
         // Дефолтные значения
         private const val DEFAULT_NICKNAME = "Player"
@@ -51,6 +52,7 @@ class SettingsDataStore(private val context: Context) {
         private const val DEFAULT_ANIMATIONS_ENABLED = true
         private const val DEFAULT_VIBRATION_ENABLED = true
         private const val DEFAULT_SHIP_SKIN = "default"
+        private const val DEFAULT_LANGUAGE = "en"  // Fallback: English
     }
     
     // ========================================
@@ -119,6 +121,15 @@ class SettingsDataStore(private val context: Context) {
     val selectedShipSkinFlow: Flow<String> = context.dataStore.data
         .map { preferences ->
             preferences[SELECTED_SHIP_SKIN_KEY] ?: DEFAULT_SHIP_SKIN
+        }
+
+    /**
+     * Flow с настройкой языка приложения
+     * Поддерживаемые значения: "en", "ru"
+     */
+    val languageFlow: Flow<String> = context.dataStore.data
+        .map { preferences ->
+            preferences[LANGUAGE_KEY] ?: DEFAULT_LANGUAGE
         }
 
     // ========================================
@@ -214,6 +225,17 @@ class SettingsDataStore(private val context: Context) {
     }
 
     /**
+     * Сохранение выбранного языка
+     *
+     * @param languageCode Код языка ("en" или "ru")
+     */
+    suspend fun setLanguage(languageCode: String) {
+        context.dataStore.edit { preferences ->
+            preferences[LANGUAGE_KEY] = languageCode
+        }
+    }
+
+    /**
      * Сброс всех настроек к дефолтным значениям (кроме никнейма)
      */
     suspend fun resetToDefaults() {
@@ -245,7 +267,8 @@ class SettingsDataStore(private val context: Context) {
             soundEffectsEnabled = preferences[SOUND_EFFECTS_ENABLED_KEY] ?: DEFAULT_SOUND_EFFECTS_ENABLED,
             animationsEnabled = preferences[ANIMATIONS_ENABLED_KEY] ?: DEFAULT_ANIMATIONS_ENABLED,
             vibrationEnabled = preferences[VIBRATION_ENABLED_KEY] ?: DEFAULT_VIBRATION_ENABLED,
-            selectedShipSkin = preferences[SELECTED_SHIP_SKIN_KEY] ?: DEFAULT_SHIP_SKIN
+            selectedShipSkin = preferences[SELECTED_SHIP_SKIN_KEY] ?: DEFAULT_SHIP_SKIN,
+            language = preferences[LANGUAGE_KEY] ?: DEFAULT_LANGUAGE
         )
     }
 }
@@ -263,5 +286,6 @@ data class SettingsSnapshot(
     val soundEffectsEnabled: Boolean,
     val animationsEnabled: Boolean,
     val vibrationEnabled: Boolean,
-    val selectedShipSkin: String
+    val selectedShipSkin: String,
+    val language: String
 )

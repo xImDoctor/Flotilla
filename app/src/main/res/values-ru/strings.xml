@@ -1,0 +1,121 @@
+<resources>
+    <string name="app_name">Flotilla</string>
+
+    <!-- Общие строки -->
+    <string name="common_back">Назад</string>
+    <string name="common_exit">Выйти</string>
+
+    <!-- Language Switcher -->
+    <string name="language_english">EN</string>
+    <string name="language_russian">RU</string>
+
+    <!-- Main Menu Screen -->
+    <string name="main_menu_title">FLOTILLA</string>
+    <string name="main_menu_subtitle">Морской бой</string>
+    <string name="main_menu_play_vs_ai">Игра против ИИ</string>
+    <string name="main_menu_find_opponent">Найти соперника</string>
+    <string name="main_menu_statistics">Статистика</string>
+    <string name="main_menu_settings">Настройки</string>
+    <string name="main_menu_ai_section">Игра против ИИ</string>
+    <string name="main_menu_online_section">Онлайн режим</string>
+
+    <!-- Ship Setup Screen -->
+    <string name="ship_setup_title">Разместите корабли</string>
+    <string name="ship_setup_heading">Расстановка кораблей</string>
+    <string name="ship_setup_game_mode">Режим игры: %1$s</string>
+    <string name="ship_setup_grid_placeholder">Сетка 10x10\n(В будущих обновлениях…)</string>
+    <string name="ship_setup_ready_button">К бою готов!</string>
+
+    <!-- Statistics Screen -->
+    <string name="statistics_title">Статистика</string>
+    <string name="statistics_total_games">Всего игр</string>
+    <string name="statistics_wins">Побед</string>
+    <string name="statistics_losses">Поражений</string>
+    <string name="statistics_win_rate">Процент побед</string>
+    <string name="statistics_accuracy">Точность попаданий</string>
+    <string name="statistics_empty_message">Сыграйте матч, чтобы обновить статистику</string>
+
+    <!-- Game Screen -->
+    <string name="game_title">Происходит бой</string>
+    <string name="game_screen_heading">Игровой экран</string>
+    <string name="game_id_label">Game ID: %1$s</string>
+    <string name="game_enemy_grid_placeholder">Вражеская сетка\n(В будущих обновлениях…)</string>
+    <string name="game_player_grid_placeholder">Ваша сетка\n(В будущих обновлениях…)</string>
+    <string name="game_end_debug_button">Завершить игру (Debug)</string>
+    <string name="game_vs_separator">vs.</string>
+    <string name="game_opponent_board">Поле противника</string>
+    <string name="game_your_board">Ваше поле</string>
+    <string name="game_your_turn_instruction">Ваш ход - выберите клетку для атаки</string>
+    <string name="game_ai_turn">Ход ИИ...</string>
+    <string name="game_opponent_turn">Ход противника</string>
+
+    <!-- AI Difficulty -->
+    <string name="ai_difficulty_easy">Easy</string>
+    <string name="ai_difficulty_medium">Medium</string>
+    <string name="ai_difficulty_hard">Hard</string>
+
+    <!-- Exit Dialog -->
+    <string name="game_exit_dialog_title">Выйти из игры?</string>
+    <string name="game_exit_dialog_message">Текущая игра будет потеряна. Вы уверены?</string>
+    <string name="game_exit_confirm">Выйти</string>
+    <string name="game_exit_cancel">Отмена</string>
+
+    <!-- Find Opponent Screen -->
+    <string name="find_opponent_title">Найти соперника</string>
+    <string name="find_opponent_connecting">Подключение…</string>
+    <string name="find_opponent_searching">Ищем соперника…</string>
+    <string name="find_opponent_cancel_search">Отменить поиск</string>
+    <string name="find_opponent_ready_prompt">Готовы найти соперника?</string>
+    <string name="find_opponent_start_search">Начать поиск матча</string>
+    <string name="find_opponent_back_to_menu">Назад в меню</string>
+    <string name="find_opponent_internet_required">Для работы матчмэйкинга требуется интернет соединение</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Настройки</string>
+    <string name="settings_nickname_default">Player</string>
+    <string name="settings_nickname_label">Никнейм</string>
+    <string name="settings_nickname_title">Никнейм</string>
+    <string name="settings_nickname_hint">От 3 до 20 символов</string>
+    <string name="settings_nickname_save">Сохранить</string>
+    <string name="settings_nickname_success">Никнейм успешно изменён</string>
+    <string name="settings_nickname_error_timeout">Можно менять никнейм не чаще одного раза в 5 минут</string>
+    <string name="settings_nickname_error_taken">Этот никнейм уже занят</string>
+    <string name="settings_nickname_error_invalid">Никнейм должен содержать от 3 до 20 символов</string>
+    <string name="settings_nickname_error_network">Ошибка сети. Проверьте подключение</string>
+    <string name="settings_grid_title">Настройки сетки</string>
+    <string name="settings_show_coordinates">Показывать координаты</string>
+    <string name="settings_show_coordinates_wip">Фича в доработке</string>
+    <string name="settings_audio_effects_title">Аудио и эффекты</string>
+    <string name="settings_background_music">Фоновая музыка</string>
+    <string name="settings_music_track_title">Фоновый трек</string>
+    <string name="settings_music_track_cats_cradle">Cat\'s Cradle</string>
+    <string name="settings_music_track_hibiscus">Hibiscus</string>
+    <string name="settings_sound_effects">Звуковые эффекты</string>
+    <string name="settings_animations">Анимация</string>
+    <string name="settings_vibration">Вибрация</string>
+    <string name="settings_set_default">По умолчанию</string>
+    <string name="settings_credits_button">Об игре</string>
+
+    <!-- User Registration Screen -->
+    <string name="registration_title">FLOTILLA</string>
+    <string name="registration_subtitle">Добро пожаловать!</string>
+    <string name="registration_welcome_message">Приготовьтесь к морским сражениям! Создайте свой профиль и начните путь к победе.</string>
+    <string name="registration_nickname_label">Ваш никнейм</string>
+    <string name="registration_nickname_placeholder">Введите никнейм</string>
+    <string name="registration_nickname_hint">От 3 до 20 символов (буквы, цифры, _, -)</string>
+    <string name="registration_start_button">Начать игру</string>
+    <string name="registration_creating_profile">Создаём ваш профиль…</string>
+    <string name="registration_rules_title">Правила никнейма:</string>
+    <string name="registration_rules_description">• Минимум 3 символа\n• Максимум 20 символов\n• Разрешены буквы, цифры, подчёркивание и дефис</string>
+
+    <!-- Credits Dialog -->
+    <string name="credits_title">Об игре</string>
+    <string name="credits_developer_title">Разработчик</string>
+    <string name="credits_developer_name">ImDoctor</string>
+    <string name="credits_music_title">Фоновая музыка</string>
+    <string name="credits_music_purrple_cat">Cat\'s Cradle &amp; Hibiscus by Purrple Cat</string>
+    <string name="credits_music_link">https://purrplecat.com/</string>
+    <string name="credits_music_license">Creative Commons CC BY-SA 3.0</string>
+    <string name="credits_music_chosic">Музыка продвигается на https://www.chosic.com/free-music/all/</string>
+    <string name="credits_close">Закрыть</string>
+</resources>

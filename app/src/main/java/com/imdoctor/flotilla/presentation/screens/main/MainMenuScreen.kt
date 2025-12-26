@@ -9,11 +9,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.imdoctor.flotilla.R
+import com.imdoctor.flotilla.presentation.components.LanguageSwitcher
 
 
 // Композ для главного меню: заголовок + подзаголовок, текст для кнопок + кнопки
 @Composable
-fun MainMenuScreen(onNewGame: (String) -> Unit, onFindOpponent: () -> Unit, onStatistics: () -> Unit, onSettings: () -> Unit) {
+fun MainMenuScreen(
+    onNewGame: (String) -> Unit,
+    onFindOpponent: () -> Unit,
+    onStatistics: () -> Unit,
+    onSettings: () -> Unit,
+    currentLanguage: String,
+    onLanguageChange: (String) -> Unit
+) {
 
     Column(
         modifier = Modifier
@@ -41,7 +49,7 @@ fun MainMenuScreen(onNewGame: (String) -> Unit, onFindOpponent: () -> Unit, onSt
 
         // Секция AI игр
         Text(
-            text = "Игра против ИИ",
+            text = stringResource(R.string.main_menu_ai_section),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
         )
@@ -76,7 +84,7 @@ fun MainMenuScreen(onNewGame: (String) -> Unit, onFindOpponent: () -> Unit, onSt
 
         // Секция онлайн игр
         Text(
-            text = "Онлайн режим",
+            text = stringResource(R.string.main_menu_online_section),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
         )
@@ -108,6 +116,15 @@ fun MainMenuScreen(onNewGame: (String) -> Unit, onFindOpponent: () -> Unit, onSt
                 style = MaterialTheme.typography.labelLarge
             )
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Language Switcher
+        LanguageSwitcher(
+            currentLanguage = currentLanguage,
+            onLanguageChange = onLanguageChange,
+            modifier = Modifier.wrapContentWidth()
+        )
     }
 }
 

@@ -3,6 +3,7 @@ package com.imdoctor.flotilla.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.imdoctor.flotilla.di.AppContainer
+import com.imdoctor.flotilla.presentation.screens.main.MainMenuViewModel
 import com.imdoctor.flotilla.presentation.screens.settings.SettingsViewModel
 import com.imdoctor.flotilla.presentation.screens.stats.StatisticsViewModel
 import com.imdoctor.flotilla.presentation.screens.registration.UserRegistrationViewModel
@@ -50,6 +51,12 @@ class ViewModelFactory : ViewModelProvider.Factory {
                 MatchmakingViewModel(
                     webSocketManager = AppContainer.webSocketManager,
                     userRepository = AppContainer.userRepository
+                ) as T
+            }
+
+            modelClass.isAssignableFrom(MainMenuViewModel::class.java) -> {
+                MainMenuViewModel(
+                    settingsRepository = AppContainer.settingsRepository
                 ) as T
             }
 

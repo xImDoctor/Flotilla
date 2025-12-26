@@ -52,6 +52,7 @@ class SettingsRepository(
     val animationsEnabledFlow: Flow<Boolean> = localDataStore.animationsEnabledFlow
     val vibrationEnabledFlow: Flow<Boolean> = localDataStore.vibrationEnabledFlow
     val selectedShipSkinFlow: Flow<String> = localDataStore.selectedShipSkinFlow
+    val languageFlow: Flow<String> = localDataStore.languageFlow
 
     // МЕТОДЫ для сохранения настроек
     /**
@@ -262,6 +263,22 @@ class SettingsRepository(
                 syncSettingsToFirebase(userId)
             }
 
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Сохранение выбранного языка
+     *
+     * ВАЖНО: Эта настройка хранится ТОЛЬКО локально и НЕ синхронизируется с Firebase
+     *
+     * @param languageCode Код языка ("en" или "ru")
+     */
+    suspend fun setLanguage(languageCode: String): Result<Unit> {
+        return try {
+            localDataStore.setLanguage(languageCode)
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

@@ -19,8 +19,8 @@ android {
         applicationId = "com.imdoctor.flotilla"
         minSdk = 29
         targetSdk = 36
-        versionCode = 2
-        versionName = "0.10.0b-mt"
+        versionCode = 3
+        versionName = "0.12.0b"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -79,6 +79,9 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.process)
     implementation(libs.androidx.activity.compose)
+
+    // AppCompat для локализации (используем прямое объявление)
+    implementation("androidx.appcompat:appcompat:1.6.1")
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))

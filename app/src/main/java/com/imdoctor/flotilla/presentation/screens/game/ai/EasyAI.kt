@@ -26,12 +26,25 @@ class EasyAI : AIOpponent {
     // Очередь целей для добивания корабля
     private val targetQueue = mutableListOf<Pair<Int, Int>>()
 
+    /**
+     * Проверить, доступна ли клетка для атаки
+     * (не атакована ранее: не HIT, не MISS, не SUNK)
+     */
+    private fun isCellAvailableForAttack(x: Int, y: Int, opponentBoard: Board): Boolean {
+        if (x !in 0..9 || y !in 0..9) return false
+        val cell = opponentBoard.getCell(x, y) ?: return false
+        return cell.state == CellState.EMPTY || cell.state == CellState.SHIP
+    }
+
     override suspend fun getNextMove(opponentBoard: Board): Pair<Int, Int> {
-        // Если есть цели для добивания, стреляем по ним
-        if (targetQueue.isNotEmpty()) {
+        // Если есть цели для добивания, стреляем по ним (приоритет)
+        // Фильтруем уже атакованные клетки
+        while (targetQueue.isNotEmpty()) {
             val target = targetQueue.removeAt(0)
-            Logger.d(TAG, "Targeting queued position: $target")
-            return target
+            if (isCellAvailableForAttack(target.first, target.second, opponentBoard)) {
+                Logger.d(TAG, "Targeting queued position: $target")
+                return target
+            }
         }
 
         // Если есть непотопленные корабли с попаданиями, добиваем их
@@ -53,8 +66,16 @@ class EasyAI : AIOpponent {
             Logger.d(TAG, "Hit at ($x, $y), sunk: $sunk. Total hits: ${hits.size}")
 
             if (!sunk) {
-                // Корабль не потоплен, добавляем соседние клетки в очередь целей
-                addAdjacentTargets(x, y)
+                // Корабль не потоплен
+                if (hits.size == 1) {
+                    // Первое попадание - добавляем все 4 соседние клетки
+                    addAdjacentTargets(x, y)
+                } else {
+                    // 2+ попадания - направление известно, очищаем targetQueue
+                    // findTargetAroundHits сам найдет правильные клетки вдоль линии
+                    targetQueue.clear()
+                    Logger.d(TAG, "Direction known, cleared targetQueue")
+                }
             } else {
                 // Корабль потоплен, очищаем историю попаданий и очередь целей
                 Logger.d(TAG, "Ship sunk! Clearing targets")
@@ -128,12 +149,9 @@ class EasyAI : AIOpponent {
             )
         }
 
-        return candidates
-            .filter { (x, y) -> x in 0..9 && y in 0..9 }
-            .firstOrNull { (x, y) ->
-                val cell = opponentBoard.getCell(x, y)
-                cell?.state == CellState.EMPTY || cell?.state == CellState.SHIP
-            }
+        return candidates.firstOrNull { (x, y) ->
+            isCellAvailableForAttack(x, y, opponentBoard)
+        }
     }
 
     /**
@@ -159,11 +177,10 @@ class EasyAI : AIOpponent {
             Pair(x + 1, y),
             Pair(x, y - 1),
             Pair(x, y + 1)
-        ).filter { (px, py) -> px in 0..9 && py in 0..9 }
+        )
 
         return adjacent.firstOrNull { (px, py) ->
-            val cell = opponentBoard.getCell(px, py)
-            cell?.state == CellState.EMPTY || cell?.state == CellState.SHIP
+            isCellAvailableForAttack(px, py, opponentBoard)
         }
     }
 
@@ -175,8 +192,7 @@ class EasyAI : AIOpponent {
 
         for (x in 0..9) {
             for (y in 0..9) {
-                val cell = opponentBoard.getCell(x, y)
-                if (cell?.state == CellState.EMPTY || cell?.state == CellState.SHIP) {
+                if (isCellAvailableForAttack(x, y, opponentBoard)) {
                     availableCells.add(Pair(x, y))
                 }
             }

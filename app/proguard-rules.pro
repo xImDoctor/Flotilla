@@ -105,3 +105,69 @@
 # Flotilla Navigation
 -keep class com.imdoctor.flotilla.presentation.navigation.** { *; }
 -keepclassmembers class com.imdoctor.flotilla.presentation.navigation.** { *; }
+
+# ============================================
+# ViewModels (критично для ViewModelProvider.Factory)
+# ============================================
+# Сохранить все ViewModels и их конструкторы
+-keep class * extends androidx.lifecycle.ViewModel {
+    <init>(...);
+}
+-keepclassmembers class * extends androidx.lifecycle.ViewModel {
+    <init>(...);
+}
+
+# ViewModelFactory должен сохранить методы create
+-keep class com.imdoctor.flotilla.presentation.ViewModelFactory { *; }
+-keepclassmembers class com.imdoctor.flotilla.presentation.ViewModelFactory { *; }
+
+# ============================================
+# Kotlin Objects (критично для LocaleManager)
+# ============================================
+# Сохранить INSTANCE поле для всех Kotlin objects
+-keepclassmembers class * {
+    public static ** INSTANCE;
+}
+
+# Сохранить LocaleManager полностью
+-keep class com.imdoctor.flotilla.utils.LocaleManager { *; }
+-keepclassmembers class com.imdoctor.flotilla.utils.LocaleManager { *; }
+
+# Сохранить все утилиты
+-keep class com.imdoctor.flotilla.utils.** { *; }
+
+# ============================================
+# DataStore Preferences (критично для настроек)
+# ============================================
+# Сохранить SettingsSnapshot и все data классы в preferences
+-keep class com.imdoctor.flotilla.data.local.preferences.** { *; }
+-keepclassmembers class com.imdoctor.flotilla.data.local.preferences.** { *; }
+
+# ============================================
+# Compose UI Components
+# ============================================
+# Сохранить все компоненты (включая LanguageSwitcher)
+-keep class com.imdoctor.flotilla.presentation.components.** { *; }
+-keepclassmembers class com.imdoctor.flotilla.presentation.components.** { *; }
+
+# ============================================
+# AI Components
+# ============================================
+# Сохранить AI интерфейсы и реализации
+-keep interface com.imdoctor.flotilla.presentation.screens.game.ai.AIOpponent { *; }
+-keep class com.imdoctor.flotilla.presentation.screens.game.ai.** { *; }
+-keepclassmembers class com.imdoctor.flotilla.presentation.screens.game.ai.** { *; }
+
+# ============================================
+# AndroidX AppCompat / Localization (критично для LocaleManager)
+# ============================================
+# Сохранить AppCompatDelegate для setApplicationLocales()
+-keep class androidx.appcompat.app.AppCompatDelegate { *; }
+-keepclassmembers class androidx.appcompat.app.AppCompatDelegate { *; }
+
+# Сохранить LocaleListCompat
+-keep class androidx.core.os.LocaleListCompat { *; }
+-keepclassmembers class androidx.core.os.LocaleListCompat { *; }
+
+# Сохранить BuildCompat для проверки версий API
+-keep class androidx.core.os.BuildCompat { *; }

@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.imdoctor.flotilla.di.AppContainer
@@ -21,11 +22,20 @@ import com.imdoctor.flotilla.presentation.navigation.FlotillaNavGraph
 import com.imdoctor.flotilla.presentation.navigation.Screen
 import com.imdoctor.flotilla.presentation.theme.FlotillaColors
 import com.imdoctor.flotilla.presentation.theme.FlotillaTheme
+import com.imdoctor.flotilla.utils.LocaleManager
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+
+    private var currentLanguage: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Слушаем изменения языка для пересоздания Activity
+        observeLanguageChanges()
 
         setContent {
             FlotillaTheme {
@@ -54,6 +64,35 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Наблюдаем за изменением языка и пересоздаем Activity
+     */
+    private fun observeLanguageChanges() {
+        lifecycleScope.launch {
+            AppContainer.settingsRepository.languageFlow
+                .distinctUntilChanged()
+                .collect { newLanguage ->
+                    if (currentLanguage == null) {
+                        // Первая загрузка - просто сохраняем текущий язык
+                        currentLanguage = newLanguage
+                        android.util.Log.d("MainActivity", "Initial language set: $newLanguage")
+                    } else if (currentLanguage != newLanguage) {
+                        // Язык изменился - применяем и пересоздаем Activity
+                        android.util.Log.d("MainActivity", "Language changed from $currentLanguage to $newLanguage")
+
+                        // Применяем новую локаль
+                        LocaleManager.applyLocale(this@MainActivity, newLanguage)
+
+                        // Обновляем текущий язык
+                        currentLanguage = newLanguage
+
+                        // Пересоздаем Activity для применения изменений
+                        recreate()
+                    }
+                }
         }
     }
 

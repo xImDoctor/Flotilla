@@ -1,14 +1,18 @@
 package com.imdoctor.flotilla.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 
-
+import com.imdoctor.flotilla.presentation.ViewModelFactory
 import com.imdoctor.flotilla.presentation.screens.main.MainMenuScreen
+import com.imdoctor.flotilla.presentation.screens.main.MainMenuViewModel
 import com.imdoctor.flotilla.presentation.screens.settings.SettingsScreen
 import com.imdoctor.flotilla.presentation.screens.stats.StatisticsScreen
 import com.imdoctor.flotilla.presentation.screens.shipsetup.ShipSetupScreen
@@ -41,6 +45,9 @@ fun FlotillaNavGraph(navController: NavHostController, startDestination: String 
 
         // главное меню
         composable(Screen.MainMenu.route) {
+            val viewModel: MainMenuViewModel = viewModel(factory = ViewModelFactory())
+            val currentLanguage by viewModel.currentLanguage.collectAsStateWithLifecycle()
+
             MainMenuScreen(
 
                 onNewGame = { gameMode ->
@@ -61,6 +68,11 @@ fun FlotillaNavGraph(navController: NavHostController, startDestination: String 
 
                 onSettings = {
                     navController.navigate(Screen.Settings.route)
+                },
+
+                currentLanguage = currentLanguage,
+                onLanguageChange = { languageCode ->
+                    viewModel.changeLanguage(languageCode)
                 }
             )
         }
